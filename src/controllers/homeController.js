@@ -1,11 +1,6 @@
-import db from "../models/index.js";
-
 let getHomepage = async (req, res) => {
     try {
-        let data = await db.User.findAll();
-        return res.status(200).json({
-            result: data || [],
-        });
+        return res.send("Hello, here's dqhuy's accessories_server!");
     } catch (error) {
         console.log(error);
     }
