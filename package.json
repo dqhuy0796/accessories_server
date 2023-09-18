@@ -6,7 +6,7 @@
     "scripts": {
         "dev": "nodemon --exec babel-node src/server",
         "build": "babel src -d build --copy-files",
-        "start": "node build/server.js"
+        "start": "node server.js"
     },
     "keywords": [
         "fullstack",
