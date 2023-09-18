@@ -13,7 +13,7 @@ import verifyRefreshToken from "../middleware/verifyRefreshToken";
 
 let router = express.Router();
 
-let initWebRoutes = (app) => {
+let initRoutes = (app) => {
     router.get("/", homeController.getHomepage);
 
     /** ADMIN */
@@ -90,4 +90,4 @@ let initWebRoutes = (app) => {
     return app.use("/", router);
 };
 
-module.exports = initWebRoutes;
+module.exports = initRoutes;

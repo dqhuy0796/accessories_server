@@ -1,6 +1,6 @@
-import sequelize from "./database";
+var sequelize = require("./database");
 
-const connectDatabase = async () => {
+var connectDatabase = async function () {
     try {
         await sequelize.authenticate();
         console.log("Connected successfully on port", process.env.NODE_DATABASE_PORT);
@@ -9,4 +9,4 @@ const connectDatabase = async () => {
     }
 };
 
-export default connectDatabase;
+module.exports = connectDatabase;

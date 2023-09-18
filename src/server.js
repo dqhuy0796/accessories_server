@@ -3,7 +3,7 @@ import cors from "cors";
 import express from "express";
 import dotenv from "dotenv";
 import connectDatabase from "./config/connectdb.js";
-import initWebRoutes from "./routes/web.js";
+import initRoutes from "./routes/web.js";
 
 dotenv.config();
 
@@ -15,7 +15,7 @@ app.use(bodyParser.json());
 
 app.use(bodyParser.urlencoded({ extended: true }));
 
-initWebRoutes(app);
+initRoutes(app);
 
 connectDatabase();
 
