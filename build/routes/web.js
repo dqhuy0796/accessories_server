@@ -24,8 +24,8 @@ var initRoutes = function initRoutes(app) {
   /** AUTH */
 
   router.post("/api/auth/user/login", _authController["default"].userLogin);
-  router.post("/api/auth/user/refresh", _authController["default"].userRefresh);
-  router.post("/api/auth/user/changepassword", _verifyAccessToken["default"], _authController["default"].changeUserPassword);
+  router.post("/api/auth/user/logout", _authController["default"].userLogout);
+  router.post("/api/auth/user/refresh", _verifyRefreshToken["default"], _authController["default"].userRefresh);
   router.post("/api/auth/customer/login", _authController["default"].customerLogin);
   router.post("/api/auth/customer/register", _authController["default"].customerRegister);
   router.post("/api/auth/customer/verify-refresh-token", _authController["default"].customerVerifyRefreshToken);
@@ -36,10 +36,20 @@ var initRoutes = function initRoutes(app) {
   /** USER */
 
   router.get("/api/role/get", _userController["default"].getRoles);
-  router.get("/api/user/get", _userController["default"].getUser);
-  router.post("/api/user/create", _userController["default"].createUser);
-  router.put("/api/user/update", _userController["default"].updateUser);
-  router["delete"]("/api/user/delete", _userController["default"].deleteUser);
+  router.get("/api/user/get", _verifyAccessToken["default"], _userController["default"].getUser);
+  router.post("/api/user/create", _verifyAccessToken["default"], _userController["default"].createUser);
+  router.put("/api/user/update", _verifyAccessToken["default"], _userController["default"].updateUser);
+  router["delete"]("/api/user/delete", _verifyAccessToken["default"], _userController["default"].deleteUser);
+
+  /** PRODUCTS */
+
+  router.get("/api/category/get", _productController["default"].getCategories);
+  router.get("/api/material/get", _productController["default"].getMaterials);
+  router.get("/api/product/count", _productController["default"].countProducts);
+  router.get("/api/product/get", _productController["default"].getProduct);
+  router.post("/api/product/create", _verifyAccessToken["default"], _productController["default"].createProduct);
+  router.put("/api/product/update", _verifyAccessToken["default"], _productController["default"].updateProduct);
+  router["delete"]("/api/product/delete", _verifyAccessToken["default"], _productController["default"].deleteProduct);
 
   /** ORDER */
 
@@ -63,17 +73,6 @@ var initRoutes = function initRoutes(app) {
   router.post("/api/address/create", _verifyAccessToken["default"], _deliveryAddressController["default"].createDeliveryAddress);
   router.put("/api/address/update", _verifyAccessToken["default"], _deliveryAddressController["default"].updateDeliveryAddress);
   router["delete"]("/api/address/delete", _verifyAccessToken["default"], _deliveryAddressController["default"].deleteDeliveryAddress);
-
-  /** PRODUCTS */
-
-  router.get("/api/category/get", _productController["default"].getCategories);
-  router.get("/api/material/get", _productController["default"].getMaterials);
-  router.get("/api/product/count", _productController["default"].countProducts);
-  router.get("/api/product/get", _productController["default"].getProduct);
-  router.post("/api/product/create", _productController["default"].createProduct);
-  router.put("/api/product/update", _productController["default"].updateProduct);
-  router["delete"]("/api/product/delete", _productController["default"].deleteProduct);
-  // router.get("/api/search", authController.search);
 
   /** IMAGES */
   router.post("/api/image/rollback", _productController["default"].rollbackImages);

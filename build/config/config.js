@@ -1,6 +1,6 @@
 "use strict";
 
-var _production;
+var _test, _production;
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return _typeof(key) === "symbol" ? key : String(key); }
@@ -20,14 +20,13 @@ module.exports = {
     },
     timezone: "+07:00"
   },
-  test: {
+  test: (_test = {
     database: "database_test",
     username: process.env.NODE_DATABASE_USERNAME,
-    password: process.env.NODE_DATABASE_PASSWORD,
-    host: process.env.NODE_DATABASE_HOST,
-    port: process.env.NODE_DATABASE_PORT,
-    dialect: process.env.NODE_DATABASE_DIALECT
-  },
+    password: process.env.NODE_DATABASE_PASSWORD
+  }, _defineProperty(_test, "database", process.env.NODE_DATABASE_NAME), _defineProperty(_test, "host", process.env.NODE_DATABASE_HOST), _defineProperty(_test, "port", process.env.NODE_DATABASE_PORT), _defineProperty(_test, "dialect", process.env.NODE_DATABASE_DIALECT), _defineProperty(_test, "query", {
+    raw: true
+  }), _defineProperty(_test, "timezone", "+07:00"), _test),
   production: (_production = {
     database: "database_production",
     username: process.env.NODE_DATABASE_USERNAME,

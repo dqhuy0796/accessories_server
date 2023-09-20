@@ -79,7 +79,29 @@ const handleGetProducts = async (encodedSlugs, page) => {
         const currentPage = page && !_.isNaN(page) ? page : 1;
         const decodedSlugs = decodeURIComponent(encodedSlugs);
 
-        if (!_.isEmpty(decodedSlugs)) {
+        if (decodedSlugs === "all") {
+            const { count, rows } = await db.Product.findAndCountAll({
+                attributes: {
+                    exclude: ["description", "color"],
+                },
+                order: [["id", "DESC"]],
+                limit: 12,
+                offset: (currentPage - 1) * 12,
+            });
+
+            if (rows) {
+                return {
+                    code: ResponseCode.SUCCESS,
+                    message: "get products successfully",
+                    page: currentPage,
+                    total_pages: Math.ceil(count / 12),
+                    total_results: count,
+                    result: rows,
+                };
+            }
+        }
+
+        if (!_.isEmpty(decodedSlugs) && decodedSlugs !== "all") {
             const slugs = decodedSlugs.split(",");
 
             const categories = await db.Category.findAll({
@@ -110,26 +132,6 @@ const handleGetProducts = async (encodedSlugs, page) => {
                     result: rows,
                 };
             }
-        }
-
-        const { count, rows } = await db.Product.findAndCountAll({
-            attributes: {
-                exclude: ["description", "color"],
-            },
-            order: [["id", "DESC"]],
-            limit: 12,
-            offset: (currentPage - 1) * 12,
-        });
-
-        if (rows) {
-            return {
-                code: ResponseCode.SUCCESS,
-                message: "get products successfully",
-                page: currentPage,
-                total_pages: Math.ceil(count / 12),
-                total_results: count,
-                result: rows,
-            };
         }
 
         return {

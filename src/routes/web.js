@@ -23,8 +23,8 @@ let initRoutes = (app) => {
     /** AUTH */
 
     router.post("/api/auth/user/login", authController.userLogin);
-    router.post("/api/auth/user/refresh", authController.userRefresh);
-    router.post("/api/auth/user/changepassword", verifyAccessToken, authController.changeUserPassword);
+    router.post("/api/auth/user/logout", authController.userLogout);
+    router.post("/api/auth/user/refresh", verifyRefreshToken, authController.userRefresh);
 
     router.post("/api/auth/customer/login", authController.customerLogin);
     router.post("/api/auth/customer/register", authController.customerRegister);
@@ -36,10 +36,20 @@ let initRoutes = (app) => {
     /** USER */
 
     router.get("/api/role/get", userController.getRoles);
-    router.get("/api/user/get", userController.getUser);
-    router.post("/api/user/create", userController.createUser);
-    router.put("/api/user/update", userController.updateUser);
-    router.delete("/api/user/delete", userController.deleteUser);
+    router.get("/api/user/get", verifyAccessToken, userController.getUser);
+    router.post("/api/user/create", verifyAccessToken, userController.createUser);
+    router.put("/api/user/update", verifyAccessToken, userController.updateUser);
+    router.delete("/api/user/delete", verifyAccessToken, userController.deleteUser);
+
+    /** PRODUCTS */
+
+    router.get("/api/category/get", productController.getCategories);
+    router.get("/api/material/get", productController.getMaterials);
+    router.get("/api/product/count", productController.countProducts);
+    router.get("/api/product/get", productController.getProduct);
+    router.post("/api/product/create", verifyAccessToken, productController.createProduct);
+    router.put("/api/product/update", verifyAccessToken, productController.updateProduct);
+    router.delete("/api/product/delete", verifyAccessToken, productController.deleteProduct);
 
     /** ORDER */
 
@@ -63,17 +73,6 @@ let initRoutes = (app) => {
     router.post("/api/address/create", verifyAccessToken, deliveryAddressController.createDeliveryAddress);
     router.put("/api/address/update", verifyAccessToken, deliveryAddressController.updateDeliveryAddress);
     router.delete("/api/address/delete", verifyAccessToken, deliveryAddressController.deleteDeliveryAddress);
-
-    /** PRODUCTS */
-
-    router.get("/api/category/get", productController.getCategories);
-    router.get("/api/material/get", productController.getMaterials);
-    router.get("/api/product/count", productController.countProducts);
-    router.get("/api/product/get", productController.getProduct);
-    router.post("/api/product/create", productController.createProduct);
-    router.put("/api/product/update", productController.updateProduct);
-    router.delete("/api/product/delete", productController.deleteProduct);
-    // router.get("/api/search", authController.search);
 
     /** IMAGES */
     router.post("/api/image/rollback", productController.rollbackImages);

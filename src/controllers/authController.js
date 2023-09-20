@@ -4,35 +4,46 @@ const customerAuthService = require("../services/customerAuthService");
 
 /** -------------------------------- USER AUTH -------------------------------- */
 
-let userLogin = async (req, res) => {
-    let username = req.body.username;
-    let password = req.body.password;
+const userLogin = async (req, res) => {
+    const { username, password } = req.body;
 
-    if (!username || !password) {
-        return res.status(500).json({
-            code: ResponseCode.AUTHENTICATION_ERROR,
-            message: "Incorrect username or password.",
-        });
+    if (username && password) {
+        const data = await userAuthService.handleLogin(username, password);
+        return res.status(200).json(data);
     }
 
-    let data = await userAuthService.handleLogin(username, password);
-
-    return res.status(200).json(data);
+    return res.status(400).json({
+        code: ResponseCode.MISSING_PARAMETER,
+        message: "Missing parameter(s). Check again.",
+    });
 };
 
-let userRefresh = async (req, res) => {
-    const token = req.body["x-refresh-token"];
+const userLogout = async (req, res) => {
+    const { phone_number } = req.body;
 
-    if (!token) {
-        return res.status(403).json({
-            code: ResponseCode.AUTHORIZATION_ERROR,
-            message: "Forbidden. Invalid refresh token.",
-        });
+    if (phone_number) {
+        const data = await userAuthService.handleLogout(phone_number);
+        return res.status(200).json(data);
     }
 
-    let data = await userAuthService.handleRegenerateAccessToken(token);
+    return res.status(400).json({
+        code: ResponseCode.MISSING_PARAMETER,
+        message: "Missing parameter(s). Check again.",
+    });
+};
 
-    return res.status(200).json(data);
+const userRefresh = async (req, res) => {
+    const token = req.body["x-refresh-token"];
+
+    if (token) {
+        const data = await userAuthService.handleRefreshTokens(token);
+        return res.status(200).json(data);
+    }
+
+    return res.status(400).json({
+        code: ResponseCode.MISSING_PARAMETER,
+        message: "Missing parameter(s). Check again.",
+    });
 };
 
 let changeUserPassword = async (req, res) => {
@@ -160,6 +171,7 @@ let changeCustomerPassword = async (req, res) => {
 export default {
     userRefresh,
     userLogin,
+    userLogout,
     changeUserPassword,
     customerLogin,
     customerRegister,

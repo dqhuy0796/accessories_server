@@ -2,54 +2,213 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { ResponseCode } from "../constant";
 import db from "../models";
+const { Op } = require("sequelize");
+import sequelize from "../config/database";
 
 /** USER */
 
-let handleLogin = (username, password) => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            let user = await db.User.findOne({
-                where: { username: username },
-                raw: true,
-            });
+const handleLogin = async (username, password) => {
+    try {
+        const user = await db.User.findOne({
+            where: {
+                [Op.or]: [
+                    {
+                        phone_number: username,
+                    },
+                    {
+                        email: username,
+                    },
+                ],
+            },
+        });
 
-            if (!user) {
-                const code = ResponseCode.AUTHENTICATION_ERROR;
-                const message = "Incorrect username or password";
-                resolve({ code, message });
-            }
+        if (!user) {
+            return {
+                code: ResponseCode.AUTHENTICATION_ERROR,
+                message: "Incorrect Username or Password",
+            };
+        }
 
-            let isValidPassword = bcrypt.compareSync(password, user.password);
+        const isValidPassword = bcrypt.compareSync(password, user.password);
 
-            if (!isValidPassword) {
-                const code = ResponseCode.AUTHENTICATION_ERROR;
-                const message = "Incorrect username or password";
-                resolve({ code, message });
-            }
+        if (!isValidPassword) {
+            return {
+                code: ResponseCode.AUTHENTICATION_ERROR,
+                message: "Incorrect Username or Password",
+            };
+        }
 
-            delete user.password;
-            const result = user;
-            const accessToken = jwt.sign(
+        const accessToken = handleGenerateAccessToken(user);
+
+        const refreshToken = await handleGenerateRefreshToken(user);
+
+        delete user.password;
+
+        return {
+            code: ResponseCode.SUCCESS,
+            message: "Authentication successfully",
+            result: user,
+            accessToken,
+            refreshToken,
+        };
+    } catch (error) {
+        console.log(error);
+        return {
+            code: ResponseCode.INTERNAL_SERVER_ERROR,
+            message: error.message || error,
+        };
+    }
+};
+
+const handleLogout = async (phone_number) => {
+    const t = await sequelize.transaction();
+    try {
+        await Promise.all([
+            db.User.update(
                 {
-                    time: Date(),
-                    username: user.username,
-                    role: user.role,
+                    last_login: Date.now(),
                 },
-                process.env.NODE_ACCESS_TOKEN_SECRET_KEY,
                 {
-                    expiresIn: process.env.NODE_ACCESS_TOKEN_EXPIRES_IN,
+                    where: {
+                        phone_number: phone_number,
+                    },
+                    transaction: t,
+                },
+            ),
+
+            db.RefreshToken.destroy({
+                where: {
+                    phone_number: phone_number,
+                },
+                transaction: t,
+            }),
+        ]);
+
+        await t.commit();
+
+        return {
+            code: ResponseCode.SUCCESS,
+            message: "Logout successfully.",
+        };
+    } catch (error) {
+        await t.rollback();
+        console.log(error);
+        return {
+            code: ResponseCode.INTERNAL_SERVER_ERROR,
+            message: error.message || error,
+        };
+    }
+};
+
+const handleRefreshTokens = (refreshToken) => {
+    return new Promise((resolve, reject) => {
+        jwt.verify(refreshToken, process.env.NODE_REFRESH_TOKEN_SECRET_KEY, async (err, data) => {
+            if (err) {
+                reject({
+                    code: ResponseCode.AUTHORIZATION_ERROR,
+                    message: "Forbidden. Invalid refresh token.",
+                });
+            } else {
+                try {
+                    const existedRefreshToken = await db.RefreshToken.findOne({
+                        where: {
+                            phone_number: data.phone_number,
+                            token: refreshToken,
+                        },
+                    });
+
+                    if (existedRefreshToken) {
+                        const newAccessToken = handleGenerateAccessToken(data);
+                        const newRefreshToken = await handleGenerateRefreshToken(data);
+
+                        resolve({
+                            code: ResponseCode.SUCCESS,
+                            message: "Refresh successfully.",
+                            accessToken: newAccessToken,
+                            refreshToken: newRefreshToken,
+                        });
+                    } else {
+                        reject({
+                            code: ResponseCode.AUTHORIZATION_ERROR,
+                            message: "Forbidden. Invalid refresh token.",
+                        });
+                    }
+                } catch (error) {
+                    console.error(error);
+                    reject({
+                        code: ResponseCode.INTERNAL_SERVER_ERROR,
+                        message: "An error occurred.",
+                    });
+                }
+            }
+        });
+    });
+};
+
+const handleGenerateAccessToken = (user) => {
+    const accessToken = jwt.sign(
+        {
+            time: Date(),
+            email: user.email,
+            phone_number: user.phone_number,
+            role_id: user.role_id,
+        },
+        process.env.NODE_ACCESS_TOKEN_SECRET_KEY,
+        {
+            expiresIn: process.env.NODE_ACCESS_TOKEN_EXPIRES_IN,
+        },
+    );
+
+    return accessToken;
+};
+
+const handleGenerateRefreshToken = async (user) => {
+    try {
+        const newRefreshToken = jwt.sign(
+            {
+                time: Date(),
+                email: user.email,
+                phone_number: user.phone_number,
+                role_id: user.role_id,
+            },
+            process.env.NODE_REFRESH_TOKEN_SECRET_KEY,
+            {
+                expiresIn: process.env.NODE_REFRESH_TOKEN_EXPIRES_IN,
+            },
+        );
+        const expirationDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+
+        const newRecords = {
+            phone_number: user.phone_number,
+            token: newRefreshToken,
+            expirationDate,
+        };
+
+        const [refreshToken, created] = await db.RefreshToken.findOrCreate({
+            where: {
+                phone_number: user.phone_number,
+            },
+            defaults: newRecords,
+        });
+
+        if (!created) {
+            await db.RefreshToken.update(
+                {
+                    token: newRefreshToken,
+                    expirationDate: expirationDate,
+                },
+                {
+                    where: {
+                        phone_number: user.phone_number,
+                    },
                 },
             );
-
-            const refreshToken = await handleGenerateRefreshToken(user.username, user.role);
-
-            const code = ResponseCode.SUCCESS;
-            const message = "Authenticate successfully. Welcome!";
-            resolve({ result, accessToken, refreshToken, code, message });
-        } catch (error) {
-            reject(error);
         }
-    });
+
+        return newRefreshToken;
+    } catch (error) {
+        throw error;
+    }
 };
 
 let handleChangePassword = (username, password, newPassword) => {
@@ -95,147 +254,16 @@ let handleChangePassword = (username, password, newPassword) => {
     });
 };
 
-let handleGenerateRefreshToken = async (username, role) => {
-    try {
-        const newRefreshToken = jwt.sign(
-            { time: Date(), username: username, role: role },
-            process.env.NODE_REFRESH_TOKEN_SECRET_KEY,
-            { expiresIn: process.env.NODE_REFRESH_TOKEN_EXPIRES_IN },
-        );
-        const expirationDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
-
-        let existedRefreshToken = await db.RefreshToken.findOne({
-            where: {
-                username: username,
-            },
-        });
-        // create new if not exist
-        if (!existedRefreshToken) {
-            await db.RefreshToken.create({
-                username: username,
-                token: newRefreshToken,
-                expirationDate: expirationDate,
-            });
-        }
-        // update if exist
-        else {
-            await db.RefreshToken.update(
-                {
-                    token: newRefreshToken,
-                    expirationDate: expirationDate,
-                },
-                {
-                    where: {
-                        username: username,
-                    },
-                },
-            );
-        }
-        return newRefreshToken;
-    } catch (error) {
-        throw error;
-    }
-};
-
-let handleRegenerateAccessToken = async (refreshToken) => {
-    return new Promise((resolve, reject) => {
-        try {
-            jwt.verify(refreshToken, process.env.NODE_REFRESH_TOKEN_SECRET_KEY, async (err, data) => {
-                console.log(err, data);
-                if (err) {
-                    resolve({
-                        code: ResponseCode.AUTHORIZATION_ERROR,
-                        message: "Forbidden. Invalid refresh token.",
-                    });
-                }
-
-                let existedRefreshToken = await db.RefreshToken.findOne({
-                    where: {
-                        username: data.username,
-                    },
-                });
-
-                if (refreshToken !== existedRefreshToken.token) {
-                    resolve({
-                        code: ResponseCode.AUTHORIZATION_ERROR,
-                        message: "Forbidden. Invalid refresh token.",
-                    });
-                }
-
-                const accessToken = jwt.sign(
-                    { time: Date(), username: data.username, role: data.role },
-                    process.env.NODE_ACCESS_TOKEN_SECRET_KEY,
-                    { expiresIn: process.env.NODE_ACCESS_TOKEN_EXPIRES_IN },
-                );
-
-                resolve({
-                    code: ResponseCode.SUCCESS,
-                    message: "Generate access token successfully.",
-                    accessToken: accessToken,
-                });
-            });
-        } catch (error) {
-            reject(error);
-        }
-    });
-};
-
 /** SUPPORTER METHODS */
-
-let isExistUsername = (currentUsername) => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            let customer = await db.Customer.findOne({
-                where: {
-                    email: currentEmail,
-                },
-            });
-            if (customer) {
-                console.log(customer);
-                resolve(true);
-            } else {
-                resolve(false);
-            }
-        } catch (error) {
-            reject(error);
-        }
-    });
-};
-
-let isExistPhone = (currentPhone) => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            let customer = await db.Customer.findOne({
-                where: {
-                    phoneNumber: currentPhone,
-                },
-            });
-            if (customer) {
-                resolve(true);
-            } else {
-                resolve(false);
-            }
-        } catch (error) {
-            reject(error);
-        }
-    });
-};
 
 let hashPassword = (password) => {
     const salt = bcrypt.genSaltSync(10);
     return bcrypt.hashSync(password, salt);
-    // return new Promise(async (resolve, reject) => {
-    //     try {
-    //         let hashPassword = bcrypt.hashSync(password, salt);
-    //         resolve(hashPassword);
-    //     } catch (error) {
-    //         reject(error);
-    //     }
-    // });
 };
 
 module.exports = {
     handleLogin,
+    handleLogout,
     handleChangePassword,
-    handleRegenerateAccessToken,
+    handleRefreshTokens,
 };

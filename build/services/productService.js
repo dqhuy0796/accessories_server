@@ -155,7 +155,7 @@ var handleCountProducts = /*#__PURE__*/function () {
 }();
 var handleGetProducts = /*#__PURE__*/function () {
   var _ref4 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee4(encodedSlugs, page) {
-    var currentPage, decodedSlugs, slugs, categories, _yield$db$Product$fin, _count, _rows, _yield$db$Product$fin2, count, rows;
+    var currentPage, decodedSlugs, _yield$db$Product$fin, count, rows, slugs, categories, _yield$db$Product$fin2, _count, _rows;
     return _regeneratorRuntime().wrap(function _callee4$(_context4) {
       while (1) {
         switch (_context4.prev = _context4.next) {
@@ -163,20 +163,50 @@ var handleGetProducts = /*#__PURE__*/function () {
             _context4.prev = 0;
             currentPage = page && !_lodash["default"].isNaN(page) ? page : 1;
             decodedSlugs = decodeURIComponent(encodedSlugs);
-            if (_lodash["default"].isEmpty(decodedSlugs)) {
-              _context4.next = 15;
+            if (!(decodedSlugs === "all")) {
+              _context4.next = 11;
+              break;
+            }
+            _context4.next = 6;
+            return _models["default"].Product.findAndCountAll({
+              attributes: {
+                exclude: ["description", "color"]
+              },
+              order: [["id", "DESC"]],
+              limit: 12,
+              offset: (currentPage - 1) * 12
+            });
+          case 6:
+            _yield$db$Product$fin = _context4.sent;
+            count = _yield$db$Product$fin.count;
+            rows = _yield$db$Product$fin.rows;
+            if (!rows) {
+              _context4.next = 11;
+              break;
+            }
+            return _context4.abrupt("return", {
+              code: _constant.ResponseCode.SUCCESS,
+              message: "get products successfully",
+              page: currentPage,
+              total_pages: Math.ceil(count / 12),
+              total_results: count,
+              result: rows
+            });
+          case 11:
+            if (!(!_lodash["default"].isEmpty(decodedSlugs) && decodedSlugs !== "all")) {
+              _context4.next = 23;
               break;
             }
             slugs = decodedSlugs.split(",");
-            _context4.next = 7;
+            _context4.next = 15;
             return _models["default"].Category.findAll({
               where: {
                 slug: slugs
               }
             });
-          case 7:
+          case 15:
             categories = _context4.sent;
-            _context4.next = 10;
+            _context4.next = 18;
             return _models["default"].Product.findAndCountAll({
               where: {
                 category: categories.map(function (item) {
@@ -190,12 +220,12 @@ var handleGetProducts = /*#__PURE__*/function () {
               limit: 12,
               offset: (currentPage - 1) * 12
             });
-          case 10:
-            _yield$db$Product$fin = _context4.sent;
-            _count = _yield$db$Product$fin.count;
-            _rows = _yield$db$Product$fin.rows;
+          case 18:
+            _yield$db$Product$fin2 = _context4.sent;
+            _count = _yield$db$Product$fin2.count;
+            _rows = _yield$db$Product$fin2.rows;
             if (!_rows) {
-              _context4.next = 15;
+              _context4.next = 23;
               break;
             }
             return _context4.abrupt("return", {
@@ -206,51 +236,25 @@ var handleGetProducts = /*#__PURE__*/function () {
               total_results: _count,
               result: _rows
             });
-          case 15:
-            _context4.next = 17;
-            return _models["default"].Product.findAndCountAll({
-              attributes: {
-                exclude: ["description", "color"]
-              },
-              order: [["id", "DESC"]],
-              limit: 12,
-              offset: (currentPage - 1) * 12
-            });
-          case 17:
-            _yield$db$Product$fin2 = _context4.sent;
-            count = _yield$db$Product$fin2.count;
-            rows = _yield$db$Product$fin2.rows;
-            if (!rows) {
-              _context4.next = 22;
-              break;
-            }
-            return _context4.abrupt("return", {
-              code: _constant.ResponseCode.SUCCESS,
-              message: "get products successfully",
-              page: currentPage,
-              total_pages: Math.ceil(count / 12),
-              total_results: count,
-              result: rows
-            });
-          case 22:
+          case 23:
             return _context4.abrupt("return", {
               code: _constant.ResponseCode.FILE_NOT_FOUND,
               message: "get products failure"
             });
-          case 25:
-            _context4.prev = 25;
+          case 26:
+            _context4.prev = 26;
             _context4.t0 = _context4["catch"](0);
             console.log(_context4.t0);
             return _context4.abrupt("return", {
               code: _constant.ResponseCode.INTERNAL_SERVER_ERROR,
               message: _context4.t0.message || _context4.t0
             });
-          case 29:
+          case 30:
           case "end":
             return _context4.stop();
         }
       }
-    }, _callee4, null, [[0, 25]]);
+    }, _callee4, null, [[0, 26]]);
   }));
   return function handleGetProducts(_x, _x2) {
     return _ref4.apply(this, arguments);
