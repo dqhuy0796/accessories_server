@@ -43,6 +43,9 @@ module.exports = {
                 role_id: {
                   type: Sequelize.INTEGER
                 },
+                bio: {
+                  type: Sequelize.TEXT
+                },
                 createdAt: {
                   allowNull: false,
                   type: Sequelize.DATE

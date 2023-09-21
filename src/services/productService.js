@@ -92,13 +92,17 @@ const handleGetProducts = async (encodedSlugs, page) => {
             if (rows) {
                 return {
                     code: ResponseCode.SUCCESS,
-                    message: "get products successfully",
+                    message: "Get products successfully.",
                     page: currentPage,
                     total_pages: Math.ceil(count / 12),
                     total_results: count,
                     result: rows,
                 };
             }
+            return {
+                code: ResponseCode.FILE_NOT_FOUND,
+                message: "No product match, check again.",
+            };
         }
 
         if (!_.isEmpty(decodedSlugs) && decodedSlugs !== "all") {
@@ -125,18 +129,22 @@ const handleGetProducts = async (encodedSlugs, page) => {
             if (rows) {
                 return {
                     code: ResponseCode.SUCCESS,
-                    message: "get products successfully",
+                    message: "Get products successfully",
                     page: currentPage,
                     total_pages: Math.ceil(count / 12),
                     total_results: count,
                     result: rows,
                 };
             }
+            return {
+                code: ResponseCode.FILE_NOT_FOUND,
+                message: "No product match, check again.",
+            };
         }
 
         return {
             code: ResponseCode.FILE_NOT_FOUND,
-            message: "get products failure",
+            message: "Get products failure.",
         };
     } catch (error) {
         console.log(error);

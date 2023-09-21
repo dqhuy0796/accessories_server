@@ -36,27 +36,28 @@ var getRoles = /*#__PURE__*/function () {
 }();
 var getUser = /*#__PURE__*/function () {
   var _ref2 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee2(req, res) {
-    var _data, data;
+    var _req$query, username, role_id, page, _data, data;
     return _regeneratorRuntime().wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
-            if (!req.query.userId) {
-              _context2.next = 5;
+            _req$query = req.query, username = _req$query.username, role_id = _req$query.role_id, page = _req$query.page;
+            if (!username) {
+              _context2.next = 6;
               break;
             }
-            _context2.next = 3;
-            return _userService["default"].handleGetUserById(req.query.userId);
-          case 3:
+            _context2.next = 4;
+            return _userService["default"].handleGetUserByUsername(username);
+          case 4:
             _data = _context2.sent;
             return _context2.abrupt("return", res.status(200).json(_data));
-          case 5:
-            _context2.next = 7;
-            return _userService["default"].handleGetUsers(req.query.username);
-          case 7:
+          case 6:
+            _context2.next = 8;
+            return _userService["default"].handleGetUsers(role_id, page);
+          case 8:
             data = _context2.sent;
             return _context2.abrupt("return", res.status(200).json(data));
-          case 9:
+          case 10:
           case "end":
             return _context2.stop();
         }
@@ -69,12 +70,12 @@ var getUser = /*#__PURE__*/function () {
 }();
 var createUser = /*#__PURE__*/function () {
   var _ref3 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee3(req, res) {
-    var _req$body, password, name, phone_number, email, address, role_id, birth, data;
+    var _req$body, password, name, phone_number, email, avatar_url, address, role_id, birth, bio, data;
     return _regeneratorRuntime().wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
           case 0:
-            _req$body = req.body, password = _req$body.password, name = _req$body.name, phone_number = _req$body.phone_number, email = _req$body.email, address = _req$body.address, role_id = _req$body.role_id, birth = _req$body.birth;
+            _req$body = req.body, password = _req$body.password, name = _req$body.name, phone_number = _req$body.phone_number, email = _req$body.email, avatar_url = _req$body.avatar_url, address = _req$body.address, role_id = _req$body.role_id, birth = _req$body.birth, bio = _req$body.bio;
             if (!(password && name && phone_number && email && address && role_id && birth)) {
               _context3.next = 6;
               break;
@@ -87,7 +88,9 @@ var createUser = /*#__PURE__*/function () {
               email: email,
               address: address,
               role_id: role_id,
-              birth: birth
+              birth: birth,
+              bio: bio,
+              avatar_url: avatar_url
             });
           case 4:
             data = _context3.sent;
@@ -110,24 +113,27 @@ var createUser = /*#__PURE__*/function () {
 }();
 var updateUser = /*#__PURE__*/function () {
   var _ref4 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee4(req, res) {
-    var _req$body2, name, phone_number, email, address, role_id, birth, data;
+    var _req$body2, id, name, phone_number, email, avatar, address, role_id, birth, bio, data;
     return _regeneratorRuntime().wrap(function _callee4$(_context4) {
       while (1) {
         switch (_context4.prev = _context4.next) {
           case 0:
-            _req$body2 = req.body, name = _req$body2.name, phone_number = _req$body2.phone_number, email = _req$body2.email, address = _req$body2.address, role_id = _req$body2.role_id, birth = _req$body2.birth;
-            if (!(name && phone_number && email && address && role_id && birth)) {
+            _req$body2 = req.body, id = _req$body2.id, name = _req$body2.name, phone_number = _req$body2.phone_number, email = _req$body2.email, avatar = _req$body2.avatar, address = _req$body2.address, role_id = _req$body2.role_id, birth = _req$body2.birth, bio = _req$body2.bio;
+            if (!(id && name && phone_number && email && address && role_id)) {
               _context4.next = 6;
               break;
             }
             _context4.next = 4;
             return _userService["default"].handleUpdateUser({
+              id: id,
               name: name,
               phone_number: phone_number,
               email: email,
               address: address,
               role_id: role_id,
-              birth: birth
+              birth: birth,
+              bio: bio,
+              avatar: avatar
             });
           case 4:
             data = _context4.sent;

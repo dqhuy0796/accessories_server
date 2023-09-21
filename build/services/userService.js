@@ -3,8 +3,17 @@
 function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 var _bcryptjs = _interopRequireDefault(require("bcryptjs"));
 var _models = _interopRequireDefault(require("../models"));
+var _database = _interopRequireDefault(require("../config/database"));
 var _constant = require("../constant");
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0) { ; } } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
 function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return _typeof(key) === "symbol" ? key : String(key); }
 function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (_typeof(res) !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
@@ -59,73 +68,104 @@ var handleGetRoles = function handleGetRoles() {
 /** GET USER(S) */
 
 var handleGetUsers = /*#__PURE__*/function () {
-  var _ref2 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee2(username) {
-    var _users, users;
+  var _ref2 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee2(role_id, page) {
+    var currentPage, _yield$db$UserView$fi, _count, _rows, _yield$db$UserView$fi2, count, rows;
     return _regeneratorRuntime().wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
             _context2.prev = 0;
-            if (!username) {
-              _context2.next = 6;
+            currentPage = page && !_.isNaN(page) ? page : 1;
+            if (!role_id) {
+              _context2.next = 11;
               break;
             }
-            _context2.next = 4;
-            return _models["default"].UserView.findAll({
-              where: _defineProperty({}, Op.or, [{
-                phone_number: username
-              }, {
-                email: username
-              }]),
+            _context2.next = 5;
+            return _models["default"].UserView.findAndCountAll({
+              where: {
+                role_id: role_id
+              },
               attributes: {
                 exclude: ["password"]
               },
-              order: [["id", "DESC"]]
+              order: [["id", "DESC"]],
+              limit: 12,
+              offset: (currentPage - 1) * 12
             });
-          case 4:
-            _users = _context2.sent;
+          case 5:
+            _yield$db$UserView$fi = _context2.sent;
+            _count = _yield$db$UserView$fi.count;
+            _rows = _yield$db$UserView$fi.rows;
+            if (!_rows) {
+              _context2.next = 10;
+              break;
+            }
             return _context2.abrupt("return", {
               code: _constant.ResponseCode.SUCCESS,
               message: "Get user(s) successfully.",
-              result: _users
+              page: currentPage,
+              total_pages: Math.ceil(_count / 12),
+              total_results: _count,
+              result: _rows
             });
-          case 6:
-            _context2.next = 8;
-            return _models["default"].UserView.findAll({
+          case 10:
+            return _context2.abrupt("return", {
+              code: _constant.ResponseCode.FILE_NOT_FOUND,
+              message: "Get user(s) failure."
+            });
+          case 11:
+            _context2.next = 13;
+            return _models["default"].UserView.findAndCountAll({
               attributes: {
                 exclude: ["password"]
               },
-              order: [["id", "DESC"]]
+              order: [["id", "DESC"]],
+              limit: 12,
+              offset: (currentPage - 1) * 12
             });
-          case 8:
-            users = _context2.sent;
+          case 13:
+            _yield$db$UserView$fi2 = _context2.sent;
+            count = _yield$db$UserView$fi2.count;
+            rows = _yield$db$UserView$fi2.rows;
+            if (!rows) {
+              _context2.next = 18;
+              break;
+            }
             return _context2.abrupt("return", {
               code: _constant.ResponseCode.SUCCESS,
               message: "Get user(s) successfully.",
-              result: users
+              page: currentPage,
+              total_pages: Math.ceil(count / 12),
+              total_results: count,
+              result: rows
             });
-          case 12:
-            _context2.prev = 12;
+          case 18:
+            return _context2.abrupt("return", {
+              code: _constant.ResponseCode.FILE_NOT_FOUND,
+              message: "Get user(s) failure."
+            });
+          case 21:
+            _context2.prev = 21;
             _context2.t0 = _context2["catch"](0);
             console.log(_context2.t0);
             return _context2.abrupt("return", {
               code: _constant.ResponseCode.INTERNAL_SERVER_ERROR,
               message: _context2.t0.message || _context2.t0
             });
-          case 16:
+          case 25:
           case "end":
             return _context2.stop();
         }
       }
-    }, _callee2, null, [[0, 12]]);
+    }, _callee2, null, [[0, 21]]);
   }));
-  return function handleGetUsers(_x3) {
+  return function handleGetUsers(_x3, _x4) {
     return _ref2.apply(this, arguments);
   };
 }();
-var handleGetUserById = /*#__PURE__*/function () {
-  var _ref3 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee3(userId) {
-    var user;
+var handleGetUserByUsername = /*#__PURE__*/function () {
+  var _ref3 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee3(username) {
+    var user, avatar;
     return _regeneratorRuntime().wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
@@ -134,36 +174,60 @@ var handleGetUserById = /*#__PURE__*/function () {
             _context3.next = 3;
             return _models["default"].UserView.findOne({
               attributes: {
-                exclude: ["password"]
+                exclude: ["avatar_url"]
               },
-              order: [["id", "DESC"]],
-              where: {
-                id: userId
-              }
+              where: _defineProperty({}, Op.or, [{
+                phone_number: username
+              }, {
+                email: username
+              }])
             });
           case 3:
             user = _context3.sent;
+            if (!user) {
+              _context3.next = 9;
+              break;
+            }
+            _context3.next = 7;
+            return _models["default"].Image.findOne({
+              attributes: {
+                exclude: ["id", "target_id", "target_type"]
+              },
+              where: {
+                target_id: user.id,
+                target_type: "avatar"
+              }
+            });
+          case 7:
+            avatar = _context3.sent;
             return _context3.abrupt("return", {
               code: _constant.ResponseCode.SUCCESS,
               message: "Get user successfully.",
-              result: user
+              result: _objectSpread(_objectSpread({}, user), {}, {
+                avatar: avatar
+              })
             });
-          case 7:
-            _context3.prev = 7;
+          case 9:
+            return _context3.abrupt("return", {
+              code: _constant.ResponseCode.FILE_NOT_FOUND,
+              message: "Invalid user."
+            });
+          case 12:
+            _context3.prev = 12;
             _context3.t0 = _context3["catch"](0);
             console.log(_context3.t0);
             return _context3.abrupt("return", {
               code: _constant.ResponseCode.INTERNAL_SERVER_ERROR,
               message: _context3.t0.message || _context3.t0
             });
-          case 11:
+          case 16:
           case "end":
             return _context3.stop();
         }
       }
-    }, _callee3, null, [[0, 7]]);
+    }, _callee3, null, [[0, 12]]);
   }));
-  return function handleGetUserById(_x4) {
+  return function handleGetUserByUsername(_x5) {
     return _ref3.apply(this, arguments);
   };
 }();
@@ -220,7 +284,9 @@ var handleCreateUser = /*#__PURE__*/function () {
               email: user.email,
               password: hashedPassword,
               name: (user === null || user === void 0 ? void 0 : user.name) || user.phone_number,
-              birth: (user === null || user === void 0 ? void 0 : user.birth) || "",
+              avatar_url: user === null || user === void 0 ? void 0 : user.avatar_url,
+              birth: user === null || user === void 0 ? void 0 : user.birth,
+              bio: user === null || user === void 0 ? void 0 : user.bio,
               address: convertedAddress,
               last_login: Date.now(),
               role_id: (user === null || user === void 0 ? void 0 : user.role_id) || 3
@@ -245,7 +311,7 @@ var handleCreateUser = /*#__PURE__*/function () {
       }
     }, _callee4, null, [[0, 18]]);
   }));
-  return function handleCreateUser(_x5) {
+  return function handleCreateUser(_x6) {
     return _ref4.apply(this, arguments);
   };
 }();
@@ -253,64 +319,111 @@ var handleCreateUser = /*#__PURE__*/function () {
 /** UPDATE USER */
 var handleUpdateUser = /*#__PURE__*/function () {
   var _ref5 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee5(user) {
-    var existed, convertedAddress;
+    var t, existedUser, convertedAddress, _yield$db$Image$findO, _yield$db$Image$findO2, image, created;
     return _regeneratorRuntime().wrap(function _callee5$(_context5) {
       while (1) {
         switch (_context5.prev = _context5.next) {
           case 0:
-            _context5.prev = 0;
-            _context5.next = 3;
+            _context5.next = 2;
+            return _database["default"].transaction();
+          case 2:
+            t = _context5.sent;
+            _context5.prev = 3;
+            _context5.next = 6;
             return _models["default"].User.findOne({
               where: {
                 phone_number: user.phone_number,
                 email: user.email
               }
             });
-          case 3:
-            existed = _context5.sent;
-            if (existed) {
-              _context5.next = 6;
+          case 6:
+            existedUser = _context5.sent;
+            if (!existedUser) {
+              _context5.next = 23;
               break;
             }
-            return _context5.abrupt("return", {
-              code: _constant.ResponseCode.FILE_NOT_FOUND,
-              message: "Invalid user account."
-            });
-          case 6:
             convertedAddress = handleConvertAddressType(user.address);
-            _context5.next = 9;
-            return _models["default"].User.update({
+            _models["default"].User.update({
               name: user.name,
               birth: user.birth,
-              role_id: user.role_id,
+              bio: user.bio,
               address: convertedAddress
             }, {
               where: {
                 phone_number: user.phone_number,
                 email: user.email
-              }
+              },
+              transaction: t
             });
-          case 9:
+            if (!user.avatar) {
+              _context5.next = 20;
+              break;
+            }
+            _context5.next = 13;
+            return _models["default"].Image.findOrCreate({
+              where: {
+                target_id: user.id,
+                target_type: "avatar"
+              },
+              defaults: _objectSpread({
+                target_id: user.id,
+                target_type: "avatar"
+              }, user.avatar),
+              transaction: t
+            });
+          case 13:
+            _yield$db$Image$findO = _context5.sent;
+            _yield$db$Image$findO2 = _slicedToArray(_yield$db$Image$findO, 2);
+            image = _yield$db$Image$findO2[0];
+            created = _yield$db$Image$findO2[1];
+            if (created) {
+              _context5.next = 20;
+              break;
+            }
+            _context5.next = 20;
+            return _models["default"].Image.update({
+              public_id: user.avatar.public_id,
+              secure_url: user.avatar.secure_url,
+              thumbnail_url: user.avatar.thumbnail_url
+            }, {
+              where: {
+                target_id: user.id,
+                target_type: "avatar"
+              },
+              transaction: t
+            });
+          case 20:
+            _context5.next = 22;
+            return t.commit();
+          case 22:
             return _context5.abrupt("return", {
               code: _constant.ResponseCode.SUCCESS,
               message: "Update user successfully."
             });
-          case 12:
-            _context5.prev = 12;
-            _context5.t0 = _context5["catch"](0);
+          case 23:
+            return _context5.abrupt("return", {
+              code: _constant.ResponseCode.FILE_NOT_FOUND,
+              message: "Invalid user account."
+            });
+          case 26:
+            _context5.prev = 26;
+            _context5.t0 = _context5["catch"](3);
+            _context5.next = 30;
+            return t.rollback();
+          case 30:
             console.log(_context5.t0);
             return _context5.abrupt("return", {
               code: _constant.ResponseCode.INTERNAL_SERVER_ERROR,
               message: _context5.t0.message || _context5.t0
             });
-          case 16:
+          case 32:
           case "end":
             return _context5.stop();
         }
       }
-    }, _callee5, null, [[0, 12]]);
+    }, _callee5, null, [[3, 26]]);
   }));
-  return function handleUpdateUser(_x6) {
+  return function handleUpdateUser(_x7) {
     return _ref5.apply(this, arguments);
   };
 }();
@@ -371,7 +484,7 @@ var handleDeleteUser = /*#__PURE__*/function () {
       }
     }, _callee6, null, [[0, 11]]);
   }));
-  return function handleDeleteUser(_x7) {
+  return function handleDeleteUser(_x8) {
     return _ref6.apply(this, arguments);
   };
 }();
@@ -392,7 +505,7 @@ var hashPassword = function hashPassword(password) {
 module.exports = {
   handleGetRoles: handleGetRoles,
   handleGetUsers: handleGetUsers,
-  handleGetUserById: handleGetUserById,
+  handleGetUserByUsername: handleGetUserByUsername,
   handleCreateUser: handleCreateUser,
   handleUpdateUser: handleUpdateUser,
   handleDeleteUser: handleDeleteUser

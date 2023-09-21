@@ -102,8 +102,8 @@ const handleLogout = async (phone_number) => {
 
 const handleRefreshTokens = (refreshToken) => {
     return new Promise((resolve, reject) => {
-        jwt.verify(refreshToken, process.env.NODE_REFRESH_TOKEN_SECRET_KEY, async (err, data) => {
-            if (err) {
+        jwt.verify(refreshToken, process.env.NODE_REFRESH_TOKEN_SECRET_KEY, async (error, data) => {
+            if (error) {
                 reject({
                     code: ResponseCode.AUTHORIZATION_ERROR,
                     message: "Forbidden. Invalid refresh token.",
@@ -113,11 +113,10 @@ const handleRefreshTokens = (refreshToken) => {
                     const existedRefreshToken = await db.RefreshToken.findOne({
                         where: {
                             phone_number: data.phone_number,
-                            token: refreshToken,
                         },
                     });
 
-                    if (existedRefreshToken) {
+                    if (existedRefreshToken && existedRefreshToken.token === refreshToken) {
                         const newAccessToken = handleGenerateAccessToken(data);
                         const newRefreshToken = await handleGenerateRefreshToken(data);
 
@@ -133,8 +132,8 @@ const handleRefreshTokens = (refreshToken) => {
                             message: "Forbidden. Invalid refresh token.",
                         });
                     }
-                } catch (error) {
-                    console.error(error);
+                } catch (err1) {
+                    console.error(err1);
                     reject({
                         code: ResponseCode.INTERNAL_SERVER_ERROR,
                         message: "An error occurred.",
@@ -142,6 +141,9 @@ const handleRefreshTokens = (refreshToken) => {
                 }
             }
         });
+    }).catch((err2) => {
+        console.log(err2);
+        return err2;
     });
 };
 

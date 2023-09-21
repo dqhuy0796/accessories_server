@@ -41,7 +41,8 @@ module.exports = function (sequelize, DataTypes) {
     name: DataTypes.STRING,
     address: DataTypes.STRING,
     birth: DataTypes.DATE,
-    last_login: DataTypes.DATE
+    last_login: DataTypes.DATE,
+    bio: DataTypes.TEXT
   }, {
     sequelize: sequelize,
     modelName: "User",

@@ -151,13 +151,13 @@ var handleLogout = /*#__PURE__*/function () {
 var handleRefreshTokens = function handleRefreshTokens(refreshToken) {
   return new Promise(function (resolve, reject) {
     _jsonwebtoken["default"].verify(refreshToken, process.env.NODE_REFRESH_TOKEN_SECRET_KEY, /*#__PURE__*/function () {
-      var _ref3 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee3(err, data) {
+      var _ref3 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee3(error, data) {
         var existedRefreshToken, newAccessToken, newRefreshToken;
         return _regeneratorRuntime().wrap(function _callee3$(_context3) {
           while (1) {
             switch (_context3.prev = _context3.next) {
               case 0:
-                if (!err) {
+                if (!error) {
                   _context3.next = 4;
                   break;
                 }
@@ -172,13 +172,12 @@ var handleRefreshTokens = function handleRefreshTokens(refreshToken) {
                 _context3.next = 7;
                 return _models["default"].RefreshToken.findOne({
                   where: {
-                    phone_number: data.phone_number,
-                    token: refreshToken
+                    phone_number: data.phone_number
                   }
                 });
               case 7:
                 existedRefreshToken = _context3.sent;
-                if (!existedRefreshToken) {
+                if (!(existedRefreshToken && existedRefreshToken.token === refreshToken)) {
                   _context3.next = 16;
                   break;
                 }
@@ -222,6 +221,9 @@ var handleRefreshTokens = function handleRefreshTokens(refreshToken) {
         return _ref3.apply(this, arguments);
       };
     }());
+  })["catch"](function (err2) {
+    console.log(err2);
+    return err2;
   });
 };
 var handleGenerateAccessToken = function handleGenerateAccessToken(user) {

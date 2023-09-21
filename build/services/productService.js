@@ -164,7 +164,7 @@ var handleGetProducts = /*#__PURE__*/function () {
             currentPage = page && !_lodash["default"].isNaN(page) ? page : 1;
             decodedSlugs = decodeURIComponent(encodedSlugs);
             if (!(decodedSlugs === "all")) {
-              _context4.next = 11;
+              _context4.next = 12;
               break;
             }
             _context4.next = 6;
@@ -186,27 +186,32 @@ var handleGetProducts = /*#__PURE__*/function () {
             }
             return _context4.abrupt("return", {
               code: _constant.ResponseCode.SUCCESS,
-              message: "get products successfully",
+              message: "Get products successfully.",
               page: currentPage,
               total_pages: Math.ceil(count / 12),
               total_results: count,
               result: rows
             });
           case 11:
+            return _context4.abrupt("return", {
+              code: _constant.ResponseCode.FILE_NOT_FOUND,
+              message: "No product match, check again."
+            });
+          case 12:
             if (!(!_lodash["default"].isEmpty(decodedSlugs) && decodedSlugs !== "all")) {
-              _context4.next = 23;
+              _context4.next = 25;
               break;
             }
             slugs = decodedSlugs.split(",");
-            _context4.next = 15;
+            _context4.next = 16;
             return _models["default"].Category.findAll({
               where: {
                 slug: slugs
               }
             });
-          case 15:
+          case 16:
             categories = _context4.sent;
-            _context4.next = 18;
+            _context4.next = 19;
             return _models["default"].Product.findAndCountAll({
               where: {
                 category: categories.map(function (item) {
@@ -220,41 +225,46 @@ var handleGetProducts = /*#__PURE__*/function () {
               limit: 12,
               offset: (currentPage - 1) * 12
             });
-          case 18:
+          case 19:
             _yield$db$Product$fin2 = _context4.sent;
             _count = _yield$db$Product$fin2.count;
             _rows = _yield$db$Product$fin2.rows;
             if (!_rows) {
-              _context4.next = 23;
+              _context4.next = 24;
               break;
             }
             return _context4.abrupt("return", {
               code: _constant.ResponseCode.SUCCESS,
-              message: "get products successfully",
+              message: "Get products successfully",
               page: currentPage,
               total_pages: Math.ceil(_count / 12),
               total_results: _count,
               result: _rows
             });
-          case 23:
+          case 24:
             return _context4.abrupt("return", {
               code: _constant.ResponseCode.FILE_NOT_FOUND,
-              message: "get products failure"
+              message: "No product match, check again."
             });
-          case 26:
-            _context4.prev = 26;
+          case 25:
+            return _context4.abrupt("return", {
+              code: _constant.ResponseCode.FILE_NOT_FOUND,
+              message: "Get products failure."
+            });
+          case 28:
+            _context4.prev = 28;
             _context4.t0 = _context4["catch"](0);
             console.log(_context4.t0);
             return _context4.abrupt("return", {
               code: _constant.ResponseCode.INTERNAL_SERVER_ERROR,
               message: _context4.t0.message || _context4.t0
             });
-          case 30:
+          case 32:
           case "end":
             return _context4.stop();
         }
       }
-    }, _callee4, null, [[0, 26]]);
+    }, _callee4, null, [[0, 28]]);
   }));
   return function handleGetProducts(_x, _x2) {
     return _ref4.apply(this, arguments);
