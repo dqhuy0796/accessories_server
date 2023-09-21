@@ -38,6 +38,16 @@ const handleLogin = async (username, password) => {
             };
         }
 
+        const avatar = await db.Image.findOne({
+            attributes: {
+                exclude: ["id", "target_id", "target_type"],
+            },
+            where: {
+                target_id: user.id,
+                target_type: "avatar",
+            },
+        });
+
         const accessToken = handleGenerateAccessToken(user);
 
         const refreshToken = await handleGenerateRefreshToken(user);
@@ -47,7 +57,10 @@ const handleLogin = async (username, password) => {
         return {
             code: ResponseCode.SUCCESS,
             message: "Authentication successfully",
-            result: user,
+            result: {
+                ...user,
+                avatar,
+            },
             accessToken,
             refreshToken,
         };
