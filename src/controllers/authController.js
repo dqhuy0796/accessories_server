@@ -46,6 +46,28 @@ const userRefresh = async (req, res) => {
     });
 };
 
+const updateProfile = async (req, res) => {
+    const { name, phone_number, email, avatar, address, birth, bio } = req.body;
+
+    if (name && phone_number && email && address) {
+        const data = await userAuthService.handleUpdateProfile({
+            name,
+            phone_number,
+            email,
+            avatar,
+            address,
+            birth,
+            bio,
+        });
+        return res.status(200).json(data);
+    }
+
+    return res.status(400).json({
+        code: ResponseCode.MISSING_PARAMETER,
+        message: "Missing parameter(s). Check again.",
+    });
+};
+
 let changeUserPassword = async (req, res) => {
     let username = req.body.username;
     let password = req.body.password;
@@ -169,9 +191,10 @@ let changeCustomerPassword = async (req, res) => {
 };
 
 export default {
-    userRefresh,
     userLogin,
     userLogout,
+    userRefresh,
+    updateProfile,
     changeUserPassword,
     customerLogin,
     customerRegister,

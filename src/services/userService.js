@@ -2,43 +2,85 @@ import bcrypt from "bcryptjs";
 import db from "../models";
 import sequelize from "../config/database";
 import { ResponseCode } from "../constant";
+import _ from "lodash";
 const { Op } = require("sequelize");
 
-const handleGetRoles = () => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            const roles = await db.Role.findAll();
+const handleGetRoles = async (role_id) => {
+    try {
+        const roles = await db.Role.findAll({
+            where: {
+                id: {
+                    [Op.gt]: role_id ?? 5,
+                },
+            },
+        });
 
-            if (roles) {
-                resolve({
-                    code: ResponseCode.SUCCESS,
-                    message: "get roles successfully",
-                    result: roles,
-                });
-            }
-            resolve({
-                code: ResponseCode.FILE_NOT_FOUND,
-                message: "get roles failure",
-            });
-        } catch (error) {
-            reject(error);
+        if (roles.length > 0) {
+            return {
+                code: ResponseCode.SUCCESS,
+                message: "get roles successfully",
+                result: roles,
+            };
         }
-    });
+        return {
+            code: ResponseCode.FILE_NOT_FOUND,
+            message: "get roles failure",
+        };
+    } catch (error) {
+        console.log(error);
+        return {
+            code: ResponseCode.INTERNAL_SERVER_ERROR,
+            message: error.message || error,
+        };
+    }
 };
 
-/** GET USER(S) */
+const handleCountUsers = async (role_id) => {
+    try {
+        const roleId = role_id && !_.isNaN(role_id) ? role_id : 2;
 
-const handleGetUsers = async (role_id, page) => {
+        const countByRole = await db.CountRoleUserView.findAll({
+            where: {
+                id: {
+                    [Op.gt]: roleId,
+                },
+            },
+        });
+
+        if (countByRole) {
+            return {
+                code: ResponseCode.SUCCESS,
+                message: "get users count by role successfully",
+                result: countByRole,
+            };
+        }
+        return {
+            code: ResponseCode.FILE_NOT_FOUND,
+            message: "get users count by role failure",
+        };
+    } catch (error) {
+        console.log(error);
+        return {
+            code: ResponseCode.INTERNAL_SERVER_ERROR,
+            message: error.message || error,
+        };
+    }
+};
+
+const handleGetUsers = async (role_id, slug, page) => {
     try {
         const currentPage = page && !_.isNaN(page) ? page : 1;
 
-        if (role_id) {
+        if (slug !== "all") {
             const { count, rows } = await db.UserView.findAndCountAll({
                 where: {
-                    role_id,
+                    role_slug: slug,
+                    role_id: {
+                        [Op.gt]: Number(role_id) ?? 2,
+                    },
                 },
                 attributes: {
-                    exclude: ["password"],
+                    exclude: ["password", "role_slug"],
                 },
                 order: [["id", "DESC"]],
                 limit: 12,
@@ -62,9 +104,16 @@ const handleGetUsers = async (role_id, page) => {
             };
         }
 
+        const roleId = role_id && !_.isNaN(role_id) ? role_id : 2;
+
         const { count, rows } = await db.UserView.findAndCountAll({
+            where: {
+                role_id: {
+                    [Op.gt]: roleId,
+                },
+            },
             attributes: {
-                exclude: ["password"],
+                exclude: ["password", "role_slug"],
             },
             order: [["id", "DESC"]],
             limit: 12,
@@ -146,54 +195,61 @@ const handleGetUserByUsername = async (username) => {
     }
 };
 
-/** CREATE NEW USER */
-
 const handleCreateUser = async (user) => {
+    const t = sequelize.transaction();
     try {
-        const existedPhoneNumber = await db.User.findOne({
+        const existedUser = await db.User.findOne({
             where: {
-                phone_number: user.phone_number,
+                [Op.or]: [
+                    {
+                        phone_number: user.phone_number,
+                    },
+                    {
+                        email: user.email,
+                    },
+                ],
             },
         });
 
-        if (existedPhoneNumber) {
+        if (existedUser) {
             return {
                 code: ResponseCode.DATABASE_ERROR,
-                message: "Phone number already in use.",
-            };
-        }
-
-        const existedEmail = await db.User.findOne({
-            where: {
-                email: user.email,
-            },
-        });
-
-        if (existedEmail) {
-            return {
-                code: ResponseCode.DATABASE_ERROR,
-                message: "Email already in use.",
+                message: "Phone number or email already in use.",
             };
         }
 
         const hashedPassword = hashPassword(user.password);
         const convertedAddress = handleConvertAddressType(user.address);
-        await db.User.create({
+        const createdUser = await db.User.create({
             phone_number: user.phone_number,
             email: user.email,
             password: hashedPassword,
-            name: user?.name || user.phone_number,
-            avatar_url: user?.avatar_url,
-            birth: user?.birth,
-            bio: user?.bio,
+            name: user.name ?? user.phone_number,
+            birth: user.birth ?? null,
+            bio: user.bio ?? null,
             address: convertedAddress,
-            last_login: Date.now(),
-            role_id: user?.role_id || 3,
+            last_login: null,
+            role_id: user.role_id ?? 3,
         });
 
+        if (createdUser) {
+            if (user.avatar) {
+                await db.Image.create({
+                    target_id: createdUser.id,
+                    target_type: "avatar",
+                    public_id: user.avatar.public_id,
+                    secure_url: user.avatar.secure_url,
+                    thumbnail_url: user.avatar.thumbnail_url,
+                });
+            }
+            return {
+                code: ResponseCode.SUCCESS,
+                message: "Create user successfully.",
+            };
+        }
         return {
-            code: ResponseCode.SUCCESS,
-            message: "Create user successfully.",
+            code: ResponseCode.DATABASE_ERROR,
+            message: "Create user failure.",
         };
     } catch (error) {
         console.log(error);
@@ -204,7 +260,6 @@ const handleCreateUser = async (user) => {
     }
 };
 
-/** UPDATE USER */
 const handleUpdateUser = async (user) => {
     const t = await sequelize.transaction();
     try {
@@ -237,11 +292,11 @@ const handleUpdateUser = async (user) => {
             if (user.avatar) {
                 const [image, created] = await db.Image.findOrCreate({
                     where: {
-                        target_id: user.id,
+                        target_id: existedUser.id,
                         target_type: "avatar",
                     },
                     defaults: {
-                        target_id: user.id,
+                        target_id: existedUser.id,
                         target_type: "avatar",
                         ...user.avatar,
                     },
@@ -257,7 +312,7 @@ const handleUpdateUser = async (user) => {
                         },
                         {
                             where: {
-                                target_id: user.id,
+                                target_id: existedUser.id,
                                 target_type: "avatar",
                             },
                             transaction: t,
@@ -288,7 +343,6 @@ const handleUpdateUser = async (user) => {
     }
 };
 
-/** DELETE USER */
 const handleDeleteUser = async (user) => {
     try {
         const existed = await db.User.findOne({
@@ -345,6 +399,7 @@ let hashPassword = (password) => {
 
 module.exports = {
     handleGetRoles,
+    handleCountUsers,
     handleGetUsers,
     handleGetUserByUsername,
     handleCreateUser,

@@ -13,17 +13,18 @@ function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 var getRoles = /*#__PURE__*/function () {
   var _ref = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee(req, res) {
-    var data;
+    var role_id, data;
     return _regeneratorRuntime().wrap(function _callee$(_context) {
       while (1) {
         switch (_context.prev = _context.next) {
           case 0:
-            _context.next = 2;
-            return _userService["default"].handleGetRoles();
-          case 2:
+            role_id = req.query.role_id;
+            _context.next = 3;
+            return _userService["default"].handleGetRoles(role_id);
+          case 3:
             data = _context.sent;
             return _context.abrupt("return", res.status(200).json(data));
-          case 4:
+          case 5:
           case "end":
             return _context.stop();
         }
@@ -34,106 +35,87 @@ var getRoles = /*#__PURE__*/function () {
     return _ref.apply(this, arguments);
   };
 }();
-var getUser = /*#__PURE__*/function () {
+var countUsers = /*#__PURE__*/function () {
   var _ref2 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee2(req, res) {
-    var _req$query, username, role_id, page, _data, data;
+    var role_id, data;
     return _regeneratorRuntime().wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
-            _req$query = req.query, username = _req$query.username, role_id = _req$query.role_id, page = _req$query.page;
-            if (!username) {
-              _context2.next = 6;
-              break;
-            }
-            _context2.next = 4;
-            return _userService["default"].handleGetUserByUsername(username);
-          case 4:
-            _data = _context2.sent;
-            return _context2.abrupt("return", res.status(200).json(_data));
-          case 6:
-            _context2.next = 8;
-            return _userService["default"].handleGetUsers(role_id, page);
-          case 8:
+            role_id = req.query.role_id;
+            _context2.next = 3;
+            return _userService["default"].handleCountUsers(role_id);
+          case 3:
             data = _context2.sent;
             return _context2.abrupt("return", res.status(200).json(data));
-          case 10:
+          case 5:
           case "end":
             return _context2.stop();
         }
       }
     }, _callee2);
   }));
-  return function getUser(_x3, _x4) {
+  return function countUsers(_x3, _x4) {
     return _ref2.apply(this, arguments);
   };
 }();
-var createUser = /*#__PURE__*/function () {
+var getUser = /*#__PURE__*/function () {
   var _ref3 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee3(req, res) {
-    var _req$body, password, name, phone_number, email, avatar_url, address, role_id, birth, bio, data;
+    var _req$query, username, role_id, slug, page, _data, data;
     return _regeneratorRuntime().wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
           case 0:
-            _req$body = req.body, password = _req$body.password, name = _req$body.name, phone_number = _req$body.phone_number, email = _req$body.email, avatar_url = _req$body.avatar_url, address = _req$body.address, role_id = _req$body.role_id, birth = _req$body.birth, bio = _req$body.bio;
-            if (!(password && name && phone_number && email && address && role_id && birth)) {
+            _req$query = req.query, username = _req$query.username, role_id = _req$query.role_id, slug = _req$query.slug, page = _req$query.page;
+            if (!username) {
               _context3.next = 6;
               break;
             }
             _context3.next = 4;
-            return _userService["default"].handleCreateUser({
-              password: password,
-              name: name,
-              phone_number: phone_number,
-              email: email,
-              address: address,
-              role_id: role_id,
-              birth: birth,
-              bio: bio,
-              avatar_url: avatar_url
-            });
+            return _userService["default"].handleGetUserByUsername(username);
           case 4:
+            _data = _context3.sent;
+            return _context3.abrupt("return", res.status(200).json(_data));
+          case 6:
+            _context3.next = 8;
+            return _userService["default"].handleGetUsers(role_id, slug, page);
+          case 8:
             data = _context3.sent;
             return _context3.abrupt("return", res.status(200).json(data));
-          case 6:
-            return _context3.abrupt("return", res.status(400).json({
-              code: _constant.ResponseCode.MISSING_PARAMETER,
-              message: "Missing parameter(s). Check again."
-            }));
-          case 7:
+          case 10:
           case "end":
             return _context3.stop();
         }
       }
     }, _callee3);
   }));
-  return function createUser(_x5, _x6) {
+  return function getUser(_x5, _x6) {
     return _ref3.apply(this, arguments);
   };
 }();
-var updateUser = /*#__PURE__*/function () {
+var createUser = /*#__PURE__*/function () {
   var _ref4 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee4(req, res) {
-    var _req$body2, id, name, phone_number, email, avatar, address, role_id, birth, bio, data;
+    var _req$body, password, name, phone_number, email, avatar, address, role_id, birth, bio, data;
     return _regeneratorRuntime().wrap(function _callee4$(_context4) {
       while (1) {
         switch (_context4.prev = _context4.next) {
           case 0:
-            _req$body2 = req.body, id = _req$body2.id, name = _req$body2.name, phone_number = _req$body2.phone_number, email = _req$body2.email, avatar = _req$body2.avatar, address = _req$body2.address, role_id = _req$body2.role_id, birth = _req$body2.birth, bio = _req$body2.bio;
-            if (!(id && name && phone_number && email && address && role_id)) {
+            _req$body = req.body, password = _req$body.password, name = _req$body.name, phone_number = _req$body.phone_number, email = _req$body.email, avatar = _req$body.avatar, address = _req$body.address, role_id = _req$body.role_id, birth = _req$body.birth, bio = _req$body.bio;
+            if (!(password && phone_number && email && address)) {
               _context4.next = 6;
               break;
             }
             _context4.next = 4;
-            return _userService["default"].handleUpdateUser({
-              id: id,
+            return _userService["default"].handleCreateUser({
+              password: password,
               name: name,
               phone_number: phone_number,
               email: email,
+              avatar: avatar,
               address: address,
               role_id: role_id,
               birth: birth,
-              bio: bio,
-              avatar: avatar
+              bio: bio
             });
           case 4:
             data = _context4.sent;
@@ -150,27 +132,32 @@ var updateUser = /*#__PURE__*/function () {
       }
     }, _callee4);
   }));
-  return function updateUser(_x7, _x8) {
+  return function createUser(_x7, _x8) {
     return _ref4.apply(this, arguments);
   };
 }();
-var deleteUser = /*#__PURE__*/function () {
+var updateUser = /*#__PURE__*/function () {
   var _ref5 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee5(req, res) {
-    var _req$body3, id, phone_number, email, data;
+    var _req$body2, name, phone_number, email, avatar, address, role_id, birth, bio, data;
     return _regeneratorRuntime().wrap(function _callee5$(_context5) {
       while (1) {
         switch (_context5.prev = _context5.next) {
           case 0:
-            _req$body3 = req.body, id = _req$body3.id, phone_number = _req$body3.phone_number, email = _req$body3.email;
-            if (!(id && phone_number && email)) {
+            _req$body2 = req.body, name = _req$body2.name, phone_number = _req$body2.phone_number, email = _req$body2.email, avatar = _req$body2.avatar, address = _req$body2.address, role_id = _req$body2.role_id, birth = _req$body2.birth, bio = _req$body2.bio;
+            if (!(name && phone_number && email && address && role_id)) {
               _context5.next = 6;
               break;
             }
             _context5.next = 4;
-            return _userService["default"].handleDeleteUser({
-              id: id,
+            return _userService["default"].handleUpdateUser({
+              name: name,
               phone_number: phone_number,
-              email: email
+              email: email,
+              avatar: avatar,
+              address: address,
+              role_id: role_id,
+              birth: birth,
+              bio: bio
             });
           case 4:
             data = _context5.sent;
@@ -187,12 +174,50 @@ var deleteUser = /*#__PURE__*/function () {
       }
     }, _callee5);
   }));
-  return function deleteUser(_x9, _x10) {
+  return function updateUser(_x9, _x10) {
     return _ref5.apply(this, arguments);
+  };
+}();
+var deleteUser = /*#__PURE__*/function () {
+  var _ref6 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee6(req, res) {
+    var _req$body3, id, phone_number, email, data;
+    return _regeneratorRuntime().wrap(function _callee6$(_context6) {
+      while (1) {
+        switch (_context6.prev = _context6.next) {
+          case 0:
+            _req$body3 = req.body, id = _req$body3.id, phone_number = _req$body3.phone_number, email = _req$body3.email;
+            if (!(id && phone_number && email)) {
+              _context6.next = 6;
+              break;
+            }
+            _context6.next = 4;
+            return _userService["default"].handleDeleteUser({
+              id: id,
+              phone_number: phone_number,
+              email: email
+            });
+          case 4:
+            data = _context6.sent;
+            return _context6.abrupt("return", res.status(200).json(data));
+          case 6:
+            return _context6.abrupt("return", res.status(400).json({
+              code: _constant.ResponseCode.MISSING_PARAMETER,
+              message: "Missing parameter(s). Check again."
+            }));
+          case 7:
+          case "end":
+            return _context6.stop();
+        }
+      }
+    }, _callee6);
+  }));
+  return function deleteUser(_x11, _x12) {
+    return _ref6.apply(this, arguments);
   };
 }();
 var _default = {
   getRoles: getRoles,
+  countUsers: countUsers,
   getUser: getUser,
   createUser: createUser,
   updateUser: updateUser,

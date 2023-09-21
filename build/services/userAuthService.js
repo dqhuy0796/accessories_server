@@ -317,16 +317,126 @@ var handleGenerateRefreshToken = /*#__PURE__*/function () {
     return _ref4.apply(this, arguments);
   };
 }();
+var handleUpdateProfile = /*#__PURE__*/function () {
+  var _ref5 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee5(profile) {
+    var t, user, convertedAddress, _yield$db$Image$findO, _yield$db$Image$findO2, image, created;
+    return _regeneratorRuntime().wrap(function _callee5$(_context5) {
+      while (1) {
+        switch (_context5.prev = _context5.next) {
+          case 0:
+            _context5.next = 2;
+            return _database["default"].transaction();
+          case 2:
+            t = _context5.sent;
+            _context5.prev = 3;
+            _context5.next = 6;
+            return _models["default"].User.findOne({
+              where: {
+                phone_number: profile.phone_number,
+                email: profile.email
+              }
+            });
+          case 6:
+            user = _context5.sent;
+            if (!user) {
+              _context5.next = 23;
+              break;
+            }
+            convertedAddress = handleConvertAddressType(profile.address);
+            _models["default"].User.update({
+              name: profile.name,
+              birth: profile.birth,
+              bio: profile.bio,
+              address: convertedAddress
+            }, {
+              where: {
+                phone_number: profile.phone_number,
+                email: profile.email
+              },
+              transaction: t
+            });
+            if (!profile.avatar) {
+              _context5.next = 20;
+              break;
+            }
+            _context5.next = 13;
+            return _models["default"].Image.findOrCreate({
+              where: {
+                target_id: user.id,
+                target_type: "avatar"
+              },
+              defaults: _objectSpread({
+                target_id: user.id,
+                target_type: "avatar"
+              }, user.avatar),
+              transaction: t
+            });
+          case 13:
+            _yield$db$Image$findO = _context5.sent;
+            _yield$db$Image$findO2 = _slicedToArray(_yield$db$Image$findO, 2);
+            image = _yield$db$Image$findO2[0];
+            created = _yield$db$Image$findO2[1];
+            if (created) {
+              _context5.next = 20;
+              break;
+            }
+            _context5.next = 20;
+            return _models["default"].Image.update({
+              public_id: profile.avatar.public_id,
+              secure_url: profile.avatar.secure_url,
+              thumbnail_url: profile.avatar.thumbnail_url
+            }, {
+              where: {
+                target_id: user.id,
+                target_type: "avatar"
+              },
+              transaction: t
+            });
+          case 20:
+            _context5.next = 22;
+            return t.commit();
+          case 22:
+            return _context5.abrupt("return", {
+              code: _constant.ResponseCode.SUCCESS,
+              message: "Update profile successfully."
+            });
+          case 23:
+            return _context5.abrupt("return", {
+              code: _constant.ResponseCode.FILE_NOT_FOUND,
+              message: "Invalid account."
+            });
+          case 26:
+            _context5.prev = 26;
+            _context5.t0 = _context5["catch"](3);
+            _context5.next = 30;
+            return t.rollback();
+          case 30:
+            console.log(_context5.t0);
+            return _context5.abrupt("return", {
+              code: _constant.ResponseCode.INTERNAL_SERVER_ERROR,
+              message: _context5.t0.message || _context5.t0
+            });
+          case 32:
+          case "end":
+            return _context5.stop();
+        }
+      }
+    }, _callee5, null, [[3, 26]]);
+  }));
+  return function handleUpdateProfile(_x7) {
+    return _ref5.apply(this, arguments);
+  };
+}();
 var handleChangePassword = function handleChangePassword(username, password, newPassword) {
   return new Promise( /*#__PURE__*/function () {
-    var _ref5 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee5(resolve, reject) {
+    var _ref6 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee6(resolve, reject) {
       var user, isValidPassword, hashedPassword;
-      return _regeneratorRuntime().wrap(function _callee5$(_context5) {
+      return _regeneratorRuntime().wrap(function _callee6$(_context6) {
         while (1) {
-          switch (_context5.prev = _context5.next) {
+          switch (_context6.prev = _context6.next) {
             case 0:
-              _context5.prev = 0;
-              _context5.next = 3;
+              _context6.prev = 0;
+              _context6.next = 3;
               return _models["default"].User.findOne({
                 where: {
                   username: username
@@ -334,7 +444,7 @@ var handleChangePassword = function handleChangePassword(username, password, new
                 raw: true
               });
             case 3:
-              user = _context5.sent;
+              user = _context6.sent;
               if (!user) {
                 resolve({
                   code: _constant.ResponseCode.AUTHENTICATION_ERROR,
@@ -343,18 +453,18 @@ var handleChangePassword = function handleChangePassword(username, password, new
               }
               isValidPassword = _bcryptjs["default"].compareSync(password, user.password);
               if (isValidPassword) {
-                _context5.next = 10;
+                _context6.next = 10;
                 break;
               }
               resolve({
                 code: _constant.ResponseCode.AUTHENTICATION_ERROR,
                 message: "Incorrect username or password"
               });
-              _context5.next = 14;
+              _context6.next = 14;
               break;
             case 10:
               hashedPassword = hashPassword(newPassword);
-              _context5.next = 13;
+              _context6.next = 13;
               return _models["default"].User.update({
                 password: hashedPassword
               }, {
@@ -368,21 +478,21 @@ var handleChangePassword = function handleChangePassword(username, password, new
                 message: "Password has been changed."
               });
             case 14:
-              _context5.next = 19;
+              _context6.next = 19;
               break;
             case 16:
-              _context5.prev = 16;
-              _context5.t0 = _context5["catch"](0);
-              reject(_context5.t0);
+              _context6.prev = 16;
+              _context6.t0 = _context6["catch"](0);
+              reject(_context6.t0);
             case 19:
             case "end":
-              return _context5.stop();
+              return _context6.stop();
           }
         }
-      }, _callee5, null, [[0, 16]]);
+      }, _callee6, null, [[0, 16]]);
     }));
-    return function (_x7, _x8) {
-      return _ref5.apply(this, arguments);
+    return function (_x8, _x9) {
+      return _ref6.apply(this, arguments);
     };
   }());
 };
@@ -393,9 +503,14 @@ var hashPassword = function hashPassword(password) {
   var salt = _bcryptjs["default"].genSaltSync(10);
   return _bcryptjs["default"].hashSync(password, salt);
 };
+var handleConvertAddressType = function handleConvertAddressType(address) {
+  var values = [address.location, address.ward, address.district, address.province];
+  return values.join(" - ");
+};
 module.exports = {
   handleLogin: handleLogin,
   handleLogout: handleLogout,
-  handleChangePassword: handleChangePassword,
-  handleRefreshTokens: handleRefreshTokens
+  handleRefreshTokens: handleRefreshTokens,
+  handleUpdateProfile: handleUpdateProfile,
+  handleChangePassword: handleChangePassword
 };

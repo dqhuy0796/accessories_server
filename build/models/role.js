@@ -32,6 +32,7 @@ module.exports = function (sequelize, DataTypes) {
     return Role;
   }(Model);
   Role.init({
+    slug: DataTypes.STRING,
     name: DataTypes.STRING
   }, {
     sequelize: sequelize,

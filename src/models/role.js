@@ -8,6 +8,7 @@ module.exports = (sequelize, DataTypes) => {
     }
     Role.init(
         {
+            slug: DataTypes.STRING,
             name: DataTypes.STRING,
         },
         {

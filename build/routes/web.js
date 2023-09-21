@@ -26,6 +26,7 @@ var initRoutes = function initRoutes(app) {
   router.post("/api/auth/user/login", _authController["default"].userLogin);
   router.post("/api/auth/user/logout", _authController["default"].userLogout);
   router.post("/api/auth/user/refresh", _verifyRefreshToken["default"], _authController["default"].userRefresh);
+  router.put("/api/auth/user/update-profile", _verifyAccessToken["default"], _authController["default"].updateProfile);
   router.post("/api/auth/customer/login", _authController["default"].customerLogin);
   router.post("/api/auth/customer/register", _authController["default"].customerRegister);
   router.post("/api/auth/customer/verify-refresh-token", _authController["default"].customerVerifyRefreshToken);
@@ -36,6 +37,7 @@ var initRoutes = function initRoutes(app) {
   /** USER */
 
   router.get("/api/role/get", _userController["default"].getRoles);
+  router.get("/api/user/count", _userController["default"].countUsers);
   router.get("/api/user/get", _verifyAccessToken["default"], _userController["default"].getUser);
   router.post("/api/user/create", _verifyAccessToken["default"], _userController["default"].createUser);
   router.put("/api/user/update", _verifyAccessToken["default"], _userController["default"].updateUser);

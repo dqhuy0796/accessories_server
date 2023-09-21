@@ -2,35 +2,42 @@ import { ResponseCode } from "../constant";
 import userService from "../services/userService";
 
 const getRoles = async (req, res) => {
-    const data = await userService.handleGetRoles();
+    const { role_id } = req.query;
+    const data = await userService.handleGetRoles(role_id);
+    return res.status(200).json(data);
+};
+
+const countUsers = async (req, res) => {
+    const { role_id } = req.query;
+    const data = await userService.handleCountUsers(role_id);
     return res.status(200).json(data);
 };
 
 const getUser = async (req, res) => {
-    const { username, role_id, page } = req.query;
+    const { username, role_id, slug, page } = req.query;
 
     if (username) {
         const data = await userService.handleGetUserByUsername(username);
         return res.status(200).json(data);
     }
-    const data = await userService.handleGetUsers(role_id, page);
+    const data = await userService.handleGetUsers(role_id, slug, page);
     return res.status(200).json(data);
 };
 
 const createUser = async (req, res) => {
-    const { password, name, phone_number, email, avatar_url, address, role_id, birth, bio } = req.body;
+    const { password, name, phone_number, email, avatar, address, role_id, birth, bio } = req.body;
 
-    if (password && name && phone_number && email && address && role_id && birth) {
+    if (password && phone_number && email && address) {
         const data = await userService.handleCreateUser({
             password,
             name,
             phone_number,
             email,
+            avatar,
             address,
             role_id,
             birth,
             bio,
-            avatar_url,
         });
         return res.status(200).json(data);
     }
@@ -42,19 +49,18 @@ const createUser = async (req, res) => {
 };
 
 const updateUser = async (req, res) => {
-    const { id, name, phone_number, email, avatar, address, role_id, birth, bio } = req.body;
+    const { name, phone_number, email, avatar, address, role_id, birth, bio } = req.body;
 
-    if (id && name && phone_number && email && address && role_id) {
+    if (name && phone_number && email && address && role_id) {
         const data = await userService.handleUpdateUser({
-            id,
             name,
             phone_number,
             email,
+            avatar,
             address,
             role_id,
             birth,
             bio,
-            avatar,
         });
         return res.status(200).json(data);
     }
@@ -85,6 +91,7 @@ let deleteUser = async (req, res) => {
 
 export default {
     getRoles,
+    countUsers,
     getUser,
     createUser,
     updateUser,

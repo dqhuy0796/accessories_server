@@ -16,37 +16,30 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 var _require = require("sequelize"),
   Model = _require.Model;
 module.exports = function (sequelize, DataTypes) {
-  var UserView = /*#__PURE__*/function (_Model) {
-    _inherits(UserView, _Model);
-    var _super = _createSuper(UserView);
-    function UserView() {
-      _classCallCheck(this, UserView);
+  var CountRoleUserView = /*#__PURE__*/function (_Model) {
+    _inherits(CountRoleUserView, _Model);
+    var _super = _createSuper(CountRoleUserView);
+    function CountRoleUserView() {
+      _classCallCheck(this, CountRoleUserView);
       return _super.apply(this, arguments);
     }
-    _createClass(UserView, null, [{
+    _createClass(CountRoleUserView, null, [{
       key: "associate",
       value: function associate(models) {
         // Define associations here
       }
     }]);
-    return UserView;
+    return CountRoleUserView;
   }(Model);
-  UserView.init({
-    phone_number: DataTypes.STRING,
-    email: DataTypes.STRING,
+  CountRoleUserView.init({
     name: DataTypes.STRING,
-    avatar_url: DataTypes.TEXT,
-    address: DataTypes.STRING,
-    birth: DataTypes.DATE,
-    bio: DataTypes.TEXT,
-    role: DataTypes.STRING,
-    role_id: DataTypes.INTEGER,
-    role_slug: DataTypes.STRING
+    slug: DataTypes.STRING,
+    user_count: DataTypes.INTEGER
   }, {
     sequelize: sequelize,
-    modelName: "UserView",
-    tableName: "view_users",
+    modelName: "CountRoleUserView",
+    tableName: "count_role_user_view",
     timestamps: false
   });
-  return UserView;
+  return CountRoleUserView;
 };

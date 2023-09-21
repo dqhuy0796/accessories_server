@@ -226,6 +226,89 @@ const handleGenerateRefreshToken = async (user) => {
     }
 };
 
+const handleUpdateProfile = async (profile) => {
+    const t = await sequelize.transaction();
+    try {
+        const user = await db.User.findOne({
+            where: {
+                phone_number: profile.phone_number,
+                email: profile.email,
+            },
+        });
+
+        if (user) {
+            const convertedAddress = handleConvertAddressType(profile.address);
+
+            db.User.update(
+                {
+                    name: profile.name,
+                    birth: profile.birth,
+                    bio: profile.bio,
+                    address: convertedAddress,
+                },
+                {
+                    where: {
+                        phone_number: profile.phone_number,
+                        email: profile.email,
+                    },
+                    transaction: t,
+                },
+            );
+
+            if (profile.avatar) {
+                const [image, created] = await db.Image.findOrCreate({
+                    where: {
+                        target_id: user.id,
+                        target_type: "avatar",
+                    },
+                    defaults: {
+                        target_id: user.id,
+                        target_type: "avatar",
+                        ...user.avatar,
+                    },
+                    transaction: t,
+                });
+
+                if (!created) {
+                    await db.Image.update(
+                        {
+                            public_id: profile.avatar.public_id,
+                            secure_url: profile.avatar.secure_url,
+                            thumbnail_url: profile.avatar.thumbnail_url,
+                        },
+                        {
+                            where: {
+                                target_id: user.id,
+                                target_type: "avatar",
+                            },
+                            transaction: t,
+                        },
+                    );
+                }
+            }
+
+            await t.commit();
+
+            return {
+                code: ResponseCode.SUCCESS,
+                message: "Update profile successfully.",
+            };
+        }
+
+        return {
+            code: ResponseCode.FILE_NOT_FOUND,
+            message: "Invalid account.",
+        };
+    } catch (error) {
+        await t.rollback();
+        console.log(error);
+        return {
+            code: ResponseCode.INTERNAL_SERVER_ERROR,
+            message: error.message || error,
+        };
+    }
+};
+
 let handleChangePassword = (username, password, newPassword) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -276,9 +359,15 @@ let hashPassword = (password) => {
     return bcrypt.hashSync(password, salt);
 };
 
+const handleConvertAddressType = (address) => {
+    const values = [address.location, address.ward, address.district, address.province];
+    return values.join(" - ");
+};
+
 module.exports = {
     handleLogin,
     handleLogout,
-    handleChangePassword,
     handleRefreshTokens,
+    handleUpdateProfile,
+    handleChangePassword,
 };

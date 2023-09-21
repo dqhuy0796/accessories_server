@@ -13,7 +13,7 @@ var verifyRefreshToken = function verifyRefreshToken(req, res, next) {
   }
   jwt.verify(token, process.env.NODE_REFRESH_TOKEN_SECRET_KEY, function (err, data) {
     if (err) {
-      return res.status(403).json({
+      return res.status(401).json({
         code: ResponseCode.AUTHORIZATION_ERROR,
         message: "Forbidden. Invalid access token."
       });

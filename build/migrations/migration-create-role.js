@@ -19,6 +19,9 @@ module.exports = {
                   primaryKey: true,
                   type: Sequelize.INTEGER
                 },
+                slug: {
+                  type: Sequelize.STRING
+                },
                 name: {
                   type: Sequelize.STRING
                 }

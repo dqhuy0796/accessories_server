@@ -52,7 +52,7 @@ const handleGetMaterials = async () => {
 
 const handleCountProducts = async () => {
     try {
-        const countByCategory = await db.CategoryProductCountView.findAll();
+        const countByCategory = await db.CountCategoryProductView.findAll();
 
         if (countByCategory) {
             return {

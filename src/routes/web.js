@@ -25,6 +25,7 @@ let initRoutes = (app) => {
     router.post("/api/auth/user/login", authController.userLogin);
     router.post("/api/auth/user/logout", authController.userLogout);
     router.post("/api/auth/user/refresh", verifyRefreshToken, authController.userRefresh);
+    router.put("/api/auth/user/update-profile", verifyAccessToken, authController.updateProfile);
 
     router.post("/api/auth/customer/login", authController.customerLogin);
     router.post("/api/auth/customer/register", authController.customerRegister);
@@ -36,6 +37,7 @@ let initRoutes = (app) => {
     /** USER */
 
     router.get("/api/role/get", userController.getRoles);
+    router.get("/api/user/count", userController.countUsers);
     router.get("/api/user/get", verifyAccessToken, userController.getUser);
     router.post("/api/user/create", verifyAccessToken, userController.createUser);
     router.put("/api/user/update", verifyAccessToken, userController.updateUser);

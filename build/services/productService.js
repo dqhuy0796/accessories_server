@@ -117,7 +117,7 @@ var handleCountProducts = /*#__PURE__*/function () {
           case 0:
             _context3.prev = 0;
             _context3.next = 3;
-            return _models["default"].CategoryProductCountView.findAll();
+            return _models["default"].CountCategoryProductView.findAll();
           case 3:
             countByCategory = _context3.sent;
             if (!countByCategory) {
