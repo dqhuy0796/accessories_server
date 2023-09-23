@@ -496,6 +496,81 @@ var handleChangePassword = function handleChangePassword(username, password, new
     };
   }());
 };
+var handleRegister = /*#__PURE__*/function () {
+  var _ref7 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee7(user) {
+    var _user$name, existedUser, hashedPassword, convertedAddress, createdUser;
+    return _regeneratorRuntime().wrap(function _callee7$(_context7) {
+      while (1) {
+        switch (_context7.prev = _context7.next) {
+          case 0:
+            _context7.prev = 0;
+            _context7.next = 3;
+            return _models["default"].User.findOne({
+              where: _defineProperty({}, Op.or, [{
+                phone_number: user.phone_number
+              }, {
+                email: user.email
+              }])
+            });
+          case 3:
+            existedUser = _context7.sent;
+            if (!existedUser) {
+              _context7.next = 6;
+              break;
+            }
+            return _context7.abrupt("return", {
+              code: _constant.ResponseCode.DATABASE_ERROR,
+              message: "Phone number or email already in use."
+            });
+          case 6:
+            hashedPassword = hashPassword(user.password);
+            convertedAddress = handleConvertAddressType(user.address);
+            _context7.next = 10;
+            return _models["default"].User.create({
+              phone_number: user.phone_number,
+              email: user.email,
+              password: hashedPassword,
+              name: (_user$name = user.name) !== null && _user$name !== void 0 ? _user$name : user.phone_number,
+              address: convertedAddress,
+              last_login: null,
+              birth: null,
+              role_id: 3,
+              bio: null
+            });
+          case 10:
+            createdUser = _context7.sent;
+            delete createdUser.password;
+            if (!createdUser) {
+              _context7.next = 14;
+              break;
+            }
+            return _context7.abrupt("return", {
+              code: _constant.ResponseCode.SUCCESS,
+              message: "Register successfully.",
+              result: createdUser
+            });
+          case 14:
+            _context7.next = 20;
+            break;
+          case 16:
+            _context7.prev = 16;
+            _context7.t0 = _context7["catch"](0);
+            console.log(_context7.t0);
+            return _context7.abrupt("return", {
+              code: _constant.ResponseCode.INTERNAL_SERVER_ERROR,
+              message: _context7.t0.message || _context7.t0
+            });
+          case 20:
+          case "end":
+            return _context7.stop();
+        }
+      }
+    }, _callee7, null, [[0, 16]]);
+  }));
+  return function handleRegister(_x10) {
+    return _ref7.apply(this, arguments);
+  };
+}();
 
 /** SUPPORTER METHODS */
 
@@ -510,6 +585,7 @@ var handleConvertAddressType = function handleConvertAddressType(address) {
 module.exports = {
   handleLogin: handleLogin,
   handleLogout: handleLogout,
+  handleRegister: handleRegister,
   handleRefreshTokens: handleRefreshTokens,
   handleUpdateProfile: handleUpdateProfile,
   handleChangePassword: handleChangePassword

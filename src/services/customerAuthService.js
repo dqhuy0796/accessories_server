@@ -2,297 +2,228 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { ResponseCode } from "../constant";
 import db from "../models";
+const { Op } = require("sequelize");
+import sequelize from "../config/database";
 
 /** CUSTOMER */
 
-let handleLogin = (phoneNumber, password) => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            let result = await db.Customer.findOne({
-                where: { phoneNumber: phoneNumber },
-                raw: true,
-            });
-
-            if (!result) {
-                resolve({
-                    code: ResponseCode.AUTHENTICATION_ERROR,
-                    message: "Incorrect phone number or password",
-                });
-            }
-
-            let isValidPassword = bcrypt.compareSync(password, result.password);
-            if (!isValidPassword) {
-                resolve({
-                    code: ResponseCode.AUTHENTICATION_ERROR,
-                    message: "Incorrect phone number or password",
-                });
-            }
-
-            delete result.password;
-
-            const defaultDeliveryAddress = await db.DeliveryAddress.findOne({
-                where: {
-                    customerId: result.id,
-                    isDefault: true,
-                },
-            });
-            result.defaultDeliveryAddress = defaultDeliveryAddress;
-
-            const accessToken = await handleGenerateAccessToken(result.id, result.phoneNumber);
-            const refreshToken = await handleGenerateRefreshToken(result.id, result.phoneNumber);
-
-            const code = ResponseCode.SUCCESS;
-            const message = "Authenticate successfully. Welcome!";
-            resolve({ code, message, result, accessToken, refreshToken });
-        } catch (error) {
-            reject(error);
-        }
-    });
-};
-
-let handleRegister = (customer) => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            const isExistCustomer = await isExistPhone(customer.phoneNumber);
-
-            if (isExistCustomer) {
-                resolve({
-                    code: ResponseCode.DATABASE_ERROR,
-                    message: "Phone number already in use.",
-                });
-            } else {
-                const hashedPassword = hashPassword(customer.password);
-
-                await db.Customer.create({
-                    password: hashedPassword,
-                    name: customer.name,
-                    birth: null,
-                    avatarUrl: null,
-                    phoneNumber: customer.phoneNumber,
-                    email: customer.email,
-                });
-
-                resolve({
-                    code: ResponseCode.SUCCESS,
-                    message: "Register successfully. Welcome!",
-                });
-            }
-        } catch (error) {
-            reject(error);
-        }
-    });
-};
-
-let handleChangePassword = (phoneNumber, password, newPassword) => {
-    return new Promise(async (resolve, reject) => {
-        try {
-            let isExist = await isExistPhone(phoneNumber);
-
-            if (!isExist) {
-                resolve({
-                    code: ResponseCode.AUTHENTICATION_ERROR,
-                    message: "Incorrect phone number or password",
-                });
-            }
-
-            let customer = await db.Customer.findOne({
-                where: { phoneNumber: phoneNumber },
-                raw: true,
-            });
-
-            if (!customer) {
-                resolve({
-                    code: ResponseCode.AUTHENTICATION_ERROR,
-                    message: "Incorrect phone number or password",
-                });
-            }
-
-            let isValidPassword = bcrypt.compareSync(password, customer.password);
-
-            if (!isValidPassword) {
-                resolve({
-                    code: ResponseCode.AUTHENTICATION_ERROR,
-                    message: "Incorrect phone number or password",
-                });
-            } else {
-                let hashedPassword = hashPassword(newPassword);
-                await db.Customer.update(
-                    {
-                        password: hashedPassword,
-                    },
-                    {
-                        where: { phoneNumber: phoneNumber },
-                    },
-                );
-                resolve({
-                    code: ResponseCode.SUCCESS,
-                    message: "Password has been changed.",
-                });
-            }
-        } catch (error) {
-            reject(error);
-        }
-    });
-};
-
-const handleUpdateProfile = async (customer) => {
+const handleLogin = async (username, password) => {
     try {
-        const existedCustomer = await db.Customer.findOne({
+        const user = await db.User.findOne({
             where: {
-                email: customer.email,
-                phoneNumber: customer.phoneNumber,
+                [Op.or]: [
+                    {
+                        phone_number: username,
+                        role_id: 3,
+                    },
+                    {
+                        email: username,
+                        role_id: 3,
+                    },
+                ],
             },
         });
 
-        if (!existedCustomer) {
+        if (!user) {
             return {
-                code: ResponseCode.DATABASE_ERROR,
-                message: "Invalid customer. Check again!",
+                code: ResponseCode.AUTHENTICATION_ERROR,
+                message: "Incorrect Username or Password",
             };
         }
 
-        await db.Customer.update(
-            {
-                name: customer.name,
-                birth: customer.birth,
-            },
-            {
-                where: {
-                    email: customer.email,
-                    phoneNumber: customer.phoneNumber,
-                },
-            },
-        );
+        const isValidPassword = bcrypt.compareSync(password, user.password);
 
-        const updatedCustomer = await db.Customer.findOne({
+        if (!isValidPassword) {
+            return {
+                code: ResponseCode.AUTHENTICATION_ERROR,
+                message: "Incorrect Username or Password",
+            };
+        }
+
+        const avatar = await db.Image.findOne({
             attributes: {
-                exclude: ["password"],
+                exclude: ["id", "target_id", "target_type"],
             },
             where: {
-                email: customer.email,
-                phoneNumber: customer.phoneNumber,
+                target_id: user.id,
+                target_type: "avatar",
             },
         });
 
+        const accessToken = handleGenerateAccessToken(user);
+
+        const refreshToken = await handleGenerateRefreshToken(user);
+
+        delete user.password;
+
         return {
             code: ResponseCode.SUCCESS,
-            message: "Update customer successfully.",
-            result: updatedCustomer,
+            message: "Authentication successfully",
+            result: {
+                ...user,
+                avatar,
+            },
+            accessToken,
+            refreshToken,
         };
     } catch (error) {
-        throw error;
+        console.log(error);
+        return {
+            code: ResponseCode.INTERNAL_SERVER_ERROR,
+            message: error.message || error,
+        };
+    }
+};
+
+const handleRegister = async (user) => {
+    try {
+        const existedUser = await db.User.findOne({
+            where: {
+                [Op.or]: [
+                    {
+                        phone_number: user.phone_number,
+                    },
+                    {
+                        email: user.email,
+                    },
+                ],
+            },
+        });
+
+        if (existedUser) {
+            return {
+                code: ResponseCode.DATABASE_ERROR,
+                message: "Phone number or email already in use.",
+            };
+        }
+
+        const hashedPassword = hashPassword(user.password);
+        const convertedAddress = handleConvertAddressType(user.address);
+        const createdUser = await db.User.create({
+            phone_number: user.phone_number,
+            email: user.email,
+            password: hashedPassword,
+            name: user.name ?? user.phone_number,
+            address: convertedAddress,
+            last_login: null,
+            birth: null,
+            role_id: 3,
+            bio: null,
+        });
+
+        delete createdUser.password;
+
+        if (createdUser) {
+            return {
+                code: ResponseCode.SUCCESS,
+                message: "Register successfully.",
+                result: createdUser,
+            };
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            code: ResponseCode.INTERNAL_SERVER_ERROR,
+            message: error.message || error,
+        };
     }
 };
 
 /** TOKEN */
-const handleVerifyRefreshToken = async (refreshToken) => {
-    try {
-        return new Promise((resolve, reject) => {
-            jwt.verify(refreshToken, process.env.NODE_REFRESH_TOKEN_SECRET_KEY, async (err, data) => {
-                if (err) {
-                    resolve({
-                        code: ResponseCode.AUTHORIZATION_ERROR,
-                        message: "Forbidden. Invalid refresh token.",
-                    });
-                }
-
-                const existedRefreshToken = await db.RefreshToken.findOne({
-                    where: {
-                        username: data.phoneNumber,
-                    },
-                });
-
-                if (!existedRefreshToken || refreshToken !== existedRefreshToken.token) {
-                    resolve({
-                        code: ResponseCode.AUTHORIZATION_ERROR,
-                        message: "Forbidden. Invalid refresh token.",
-                    });
-                }
-
-                resolve({
-                    code: ResponseCode.SUCCESS,
-                    message: "Valid refresh token.",
-                });
-            });
-        });
-    } catch (error) {
-        console.error(error);
-        return {
-            code: ResponseCode.INTERNAL_SERVER_ERROR,
-            message: "An error occurred.",
-        };
-    }
-};
-
 const handleRefreshTokens = async (refreshToken) => {
-    try {
-        return new Promise((resolve, reject) => {
-            jwt.verify(refreshToken, process.env.NODE_REFRESH_TOKEN_SECRET_KEY, async (err, data) => {
-                if (err) {
-                    console.log(err, data);
-                    resolve({
-                        code: ResponseCode.AUTHORIZATION_ERROR,
-                        message: "Forbidden. Invalid refresh token.",
+    return new Promise((resolve, reject) => {
+        jwt.verify(refreshToken, process.env.NODE_REFRESH_TOKEN_SECRET_KEY, async (error, data) => {
+            if (error) {
+                reject({
+                    code: ResponseCode.AUTHORIZATION_ERROR,
+                    message: "Forbidden. Invalid refresh token.",
+                });
+            } else {
+                try {
+                    const existedRefreshToken = await db.RefreshToken.findOne({
+                        where: {
+                            phone_number: data.phone_number,
+                        },
+                    });
+
+                    if (existedRefreshToken && existedRefreshToken.token === refreshToken) {
+                        const newAccessToken = handleGenerateAccessToken(data);
+                        const newRefreshToken = await handleGenerateRefreshToken(data);
+
+                        resolve({
+                            code: ResponseCode.SUCCESS,
+                            message: "Refresh successfully.",
+                            accessToken: newAccessToken,
+                            refreshToken: newRefreshToken,
+                        });
+                    } else {
+                        reject({
+                            code: ResponseCode.AUTHORIZATION_ERROR,
+                            message: "Forbidden. Invalid refresh token.",
+                        });
+                    }
+                } catch (err1) {
+                    console.error(err1);
+                    reject({
+                        code: ResponseCode.INTERNAL_SERVER_ERROR,
+                        message: "An error occurred.",
                     });
                 }
-
-                const existedRefreshToken = await db.RefreshToken.findOne({
-                    where: {
-                        username: data.phoneNumber,
-                    },
-                });
-
-                if (!existedRefreshToken || refreshToken !== existedRefreshToken.token) {
-                    resolve({
-                        code: ResponseCode.AUTHORIZATION_ERROR,
-                        message: "Forbidden. Invalid refresh token.",
-                        existedRefreshToken,
-                    });
-                }
-
-                const newAccessToken = await handleGenerateAccessToken(data.id, data.phoneNumber);
-                const newRefreshToken = await handleGenerateRefreshToken(data.id, data.phoneNumber);
-
-                const code = ResponseCode.SUCCESS;
-                const message = "Authenticate successfully. Welcome!";
-                resolve({
-                    code,
-                    message,
-                    accessToken: newAccessToken,
-                    refreshToken: newRefreshToken,
-                });
-            });
+            }
         });
-    } catch (error) {
-        console.error(error);
-        return {
-            code: ResponseCode.INTERNAL_SERVER_ERROR,
-            message: "An error occurred.",
-        };
-    }
+    }).catch((err2) => {
+        console.log(err2);
+        return err2;
+    });
 };
 
-const handleGenerateRefreshToken = async (id, phoneNumber) => {
-    try {
-        const newRefreshToken = jwt.sign({ time: Date(), id, phoneNumber }, process.env.NODE_REFRESH_TOKEN_SECRET_KEY, {
-            expiresIn: process.env.NODE_REFRESH_TOKEN_EXPIRES_IN,
-        });
+const handleGenerateAccessToken = (user) => {
+    const accessToken = jwt.sign(
+        {
+            time: Date(),
+            email: user.email,
+            phone_number: user.phone_number,
+            role_id: user.role_id,
+        },
+        process.env.NODE_ACCESS_TOKEN_SECRET_KEY,
+        {
+            expiresIn: process.env.NODE_ACCESS_TOKEN_EXPIRES_IN,
+        },
+    );
 
+    return accessToken;
+};
+
+const handleGenerateRefreshToken = async (user) => {
+    try {
+        const newRefreshToken = jwt.sign(
+            {
+                time: Date(),
+                email: user.email,
+                phone_number: user.phone_number,
+                role_id: user.role_id,
+            },
+            process.env.NODE_REFRESH_TOKEN_SECRET_KEY,
+            {
+                expiresIn: process.env.NODE_REFRESH_TOKEN_EXPIRES_IN,
+            },
+        );
         const expirationDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
-        const existedRefreshToken = await db.RefreshToken.findOne({
+        const newRecords = {
+            phone_number: user.phone_number,
+            token: newRefreshToken,
+            expirationDate,
+        };
+
+        const [refreshToken, created] = await db.RefreshToken.findOrCreate({
             where: {
-                username: phoneNumber,
+                phone_number: user.phone_number,
             },
+            defaults: newRecords,
         });
 
-        if (!existedRefreshToken) {
-            await db.RefreshToken.create({
-                username: phoneNumber,
-                token: newRefreshToken,
-                expirationDate: expirationDate,
-            });
-        } else {
+        if (!created) {
             await db.RefreshToken.update(
                 {
                     token: newRefreshToken,
@@ -300,7 +231,7 @@ const handleGenerateRefreshToken = async (id, phoneNumber) => {
                 },
                 {
                     where: {
-                        username: phoneNumber,
+                        phone_number: user.phone_number,
                     },
                 },
             );
@@ -308,17 +239,8 @@ const handleGenerateRefreshToken = async (id, phoneNumber) => {
 
         return newRefreshToken;
     } catch (error) {
-        console.error(error);
-        throw new Error("An error occurred while generating a refresh token.");
+        throw error;
     }
-};
-
-const handleGenerateAccessToken = async (id, phoneNumber) => {
-    const accessToken = jwt.sign({ time: Date(), id, phoneNumber }, process.env.NODE_ACCESS_TOKEN_SECRET_KEY, {
-        expiresIn: process.env.NODE_ACCESS_TOKEN_EXPIRES_IN,
-    });
-
-    return accessToken;
 };
 
 /** SUPPORTER METHODS */
@@ -350,8 +272,5 @@ let hashPassword = (password) => {
 module.exports = {
     handleLogin,
     handleRegister,
-    handleChangePassword,
-    handleUpdateProfile,
-    handleVerifyRefreshToken,
     handleRefreshTokens,
 };

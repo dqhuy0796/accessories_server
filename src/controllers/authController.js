@@ -88,39 +88,31 @@ let changeUserPassword = async (req, res) => {
 /** -------------------------------- CUSTOMER AUTH -------------------------------- */
 
 let customerLogin = async (req, res) => {
-    let phoneNumber = req.body.phoneNumber;
-    let password = req.body.password;
+    const { username, password } = req.body;
 
-    if (!phoneNumber || !password) {
-        return res.status(500).json({
-            code: ResponseCode.AUTHENTICATION_ERROR,
-            message: "Incorrect phone number or password.",
-        });
+    if (username && password) {
+        const data = await customerAuthService.handleLogin(username, password);
+        return res.status(200).json(data);
     }
 
-    let data = await customerAuthService.handleLogin(phoneNumber, password);
-
-    return res.status(200).json(data);
+    return res.status(400).json({
+        code: ResponseCode.MISSING_PARAMETER,
+        message: "Missing parameter(s). Check again.",
+    });
 };
 
 const customerRegister = async (req, res) => {
-    const { password, name, phoneNumber, email } = req.body;
+    const { phone_number, email, password, name, address } = req.body;
 
-    if (!phoneNumber || !password || !name || !email) {
-        return res.status(500).json({
-            code: ResponseCode.AUTHENTICATION_ERROR,
-            message: "Missing information.",
-        });
+    if (phone_number && email && password && name && address) {
+        const data = await customerAuthService.handleRegister({ phone_number, email, password, name, address });
+        return res.status(200).json(data);
     }
 
-    const data = await customerAuthService.handleRegister({
-        password,
-        name,
-        phoneNumber,
-        email,
+    return res.status(400).json({
+        code: ResponseCode.MISSING_PARAMETER,
+        message: "Missing parameter(s). Check again.",
     });
-
-    return res.status(200).json(data);
 };
 
 const customerUpdateProfile = async (req, res) => {

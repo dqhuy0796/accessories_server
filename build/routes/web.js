@@ -28,10 +28,10 @@ var initRoutes = function initRoutes(app) {
   router.post("/api/auth/user/refresh", _verifyRefreshToken["default"], _authController["default"].userRefresh);
   router.put("/api/auth/user/update-profile", _verifyAccessToken["default"], _authController["default"].updateProfile);
   router.post("/api/auth/customer/login", _authController["default"].customerLogin);
+  router.post("/api/auth/customer/logout", _authController["default"].customerLogin);
   router.post("/api/auth/customer/register", _authController["default"].customerRegister);
-  router.post("/api/auth/customer/verify-refresh-token", _authController["default"].customerVerifyRefreshToken);
   router.post("/api/auth/customer/refresh", _verifyRefreshToken["default"], _authController["default"].customerRefreshTokens);
-  router.put("/api/auth/customer/update", _verifyAccessToken["default"], _authController["default"].customerUpdateProfile);
+  router.put("/api/auth/customer/update-profile", _verifyAccessToken["default"], _authController["default"].customerUpdateProfile);
   router.post("/api/auth/customer/change-password", _verifyAccessToken["default"], _authController["default"].changeCustomerPassword);
 
   /** USER */

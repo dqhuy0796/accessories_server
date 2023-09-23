@@ -194,28 +194,27 @@ var changeUserPassword = /*#__PURE__*/function () {
 
 var customerLogin = /*#__PURE__*/function () {
   var _ref6 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee6(req, res) {
-    var phoneNumber, password, data;
+    var _req$body3, username, password, data;
     return _regeneratorRuntime().wrap(function _callee6$(_context6) {
       while (1) {
         switch (_context6.prev = _context6.next) {
           case 0:
-            phoneNumber = req.body.phoneNumber;
-            password = req.body.password;
-            if (!(!phoneNumber || !password)) {
-              _context6.next = 4;
+            _req$body3 = req.body, username = _req$body3.username, password = _req$body3.password;
+            if (!(username && password)) {
+              _context6.next = 6;
               break;
             }
-            return _context6.abrupt("return", res.status(500).json({
-              code: ResponseCode.AUTHENTICATION_ERROR,
-              message: "Incorrect phone number or password."
-            }));
+            _context6.next = 4;
+            return customerAuthService.handleLogin(username, password);
           case 4:
-            _context6.next = 6;
-            return customerAuthService.handleLogin(phoneNumber, password);
-          case 6:
             data = _context6.sent;
             return _context6.abrupt("return", res.status(200).json(data));
-          case 8:
+          case 6:
+            return _context6.abrupt("return", res.status(400).json({
+              code: ResponseCode.MISSING_PARAMETER,
+              message: "Missing parameter(s). Check again."
+            }));
+          case 7:
           case "end":
             return _context6.stop();
         }
@@ -228,31 +227,32 @@ var customerLogin = /*#__PURE__*/function () {
 }();
 var customerRegister = /*#__PURE__*/function () {
   var _ref7 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee7(req, res) {
-    var _req$body3, password, name, phoneNumber, email, data;
+    var _req$body4, phone_number, email, password, name, address, data;
     return _regeneratorRuntime().wrap(function _callee7$(_context7) {
       while (1) {
         switch (_context7.prev = _context7.next) {
           case 0:
-            _req$body3 = req.body, password = _req$body3.password, name = _req$body3.name, phoneNumber = _req$body3.phoneNumber, email = _req$body3.email;
-            if (!(!phoneNumber || !password || !name || !email)) {
-              _context7.next = 3;
+            _req$body4 = req.body, phone_number = _req$body4.phone_number, email = _req$body4.email, password = _req$body4.password, name = _req$body4.name, address = _req$body4.address;
+            if (!(phone_number && email && password && name && address)) {
+              _context7.next = 6;
               break;
             }
-            return _context7.abrupt("return", res.status(500).json({
-              code: ResponseCode.AUTHENTICATION_ERROR,
-              message: "Missing information."
-            }));
-          case 3:
-            _context7.next = 5;
+            _context7.next = 4;
             return customerAuthService.handleRegister({
+              phone_number: phone_number,
+              email: email,
               password: password,
               name: name,
-              phoneNumber: phoneNumber,
-              email: email
+              address: address
             });
-          case 5:
+          case 4:
             data = _context7.sent;
             return _context7.abrupt("return", res.status(200).json(data));
+          case 6:
+            return _context7.abrupt("return", res.status(400).json({
+              code: ResponseCode.MISSING_PARAMETER,
+              message: "Missing parameter(s). Check again."
+            }));
           case 7:
           case "end":
             return _context7.stop();
@@ -266,12 +266,12 @@ var customerRegister = /*#__PURE__*/function () {
 }();
 var customerUpdateProfile = /*#__PURE__*/function () {
   var _ref8 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee8(req, res) {
-    var _req$body4, email, phoneNumber, name, birth, data;
+    var _req$body5, email, phoneNumber, name, birth, data;
     return _regeneratorRuntime().wrap(function _callee8$(_context8) {
       while (1) {
         switch (_context8.prev = _context8.next) {
           case 0:
-            _req$body4 = req.body, email = _req$body4.email, phoneNumber = _req$body4.phoneNumber, name = _req$body4.name, birth = _req$body4.birth;
+            _req$body5 = req.body, email = _req$body5.email, phoneNumber = _req$body5.phoneNumber, name = _req$body5.name, birth = _req$body5.birth;
             if (!(!phoneNumber || !email || !name || !birth)) {
               _context8.next = 3;
               break;

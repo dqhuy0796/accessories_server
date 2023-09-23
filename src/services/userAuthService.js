@@ -352,6 +352,60 @@ let handleChangePassword = (username, password, newPassword) => {
     });
 };
 
+const handleRegister = async (user) => {
+    try {
+        const existedUser = await db.User.findOne({
+            where: {
+                [Op.or]: [
+                    {
+                        phone_number: user.phone_number,
+                    },
+                    {
+                        email: user.email,
+                    },
+                ],
+            },
+        });
+
+        if (existedUser) {
+            return {
+                code: ResponseCode.DATABASE_ERROR,
+                message: "Phone number or email already in use.",
+            };
+        }
+
+        const hashedPassword = hashPassword(user.password);
+        const convertedAddress = handleConvertAddressType(user.address);
+        const createdUser = await db.User.create({
+            phone_number: user.phone_number,
+            email: user.email,
+            password: hashedPassword,
+            name: user.name ?? user.phone_number,
+            address: convertedAddress,
+            last_login: null,
+            birth: null,
+            role_id: 3,
+            bio: null,
+        });
+
+        delete createdUser.password;
+
+        if (createdUser) {
+            return {
+                code: ResponseCode.SUCCESS,
+                message: "Register successfully.",
+                result: createdUser,
+            };
+        }
+    } catch (error) {
+        console.log(error);
+        return {
+            code: ResponseCode.INTERNAL_SERVER_ERROR,
+            message: error.message || error,
+        };
+    }
+};
+
 /** SUPPORTER METHODS */
 
 let hashPassword = (password) => {
@@ -367,6 +421,7 @@ const handleConvertAddressType = (address) => {
 module.exports = {
     handleLogin,
     handleLogout,
+    handleRegister,
     handleRefreshTokens,
     handleUpdateProfile,
     handleChangePassword,

@@ -28,10 +28,10 @@ let initRoutes = (app) => {
     router.put("/api/auth/user/update-profile", verifyAccessToken, authController.updateProfile);
 
     router.post("/api/auth/customer/login", authController.customerLogin);
+    router.post("/api/auth/customer/logout", authController.customerLogin);
     router.post("/api/auth/customer/register", authController.customerRegister);
-    router.post("/api/auth/customer/verify-refresh-token", authController.customerVerifyRefreshToken);
     router.post("/api/auth/customer/refresh", verifyRefreshToken, authController.customerRefreshTokens);
-    router.put("/api/auth/customer/update", verifyAccessToken, authController.customerUpdateProfile);
+    router.put("/api/auth/customer/update-profile", verifyAccessToken, authController.customerUpdateProfile);
     router.post("/api/auth/customer/change-password", verifyAccessToken, authController.changeCustomerPassword);
 
     /** USER */
