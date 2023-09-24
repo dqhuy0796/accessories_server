@@ -12,21 +12,32 @@ module.exports = {
           switch (_context.prev = _context.next) {
             case 0:
               _context.next = 2;
-              return queryInterface.createTable("payment_methods", {
+              return queryInterface.createTable("history_order_update", {
                 id: {
                   allowNull: false,
                   autoIncrement: true,
                   primaryKey: true,
                   type: Sequelize.INTEGER
                 },
-                slug: {
+                order_uuid: {
                   type: Sequelize.STRING
                 },
-                name: {
-                  type: Sequelize.STRING
+                employee_id: {
+                  type: Sequelize.INTEGER
+                },
+                status_id: {
+                  type: Sequelize.INTEGER
                 },
                 description: {
                   type: Sequelize.TEXT
+                },
+                createdAt: {
+                  allowNull: false,
+                  type: Sequelize.DATE
+                },
+                updatedAt: {
+                  allowNull: false,
+                  type: Sequelize.DATE
                 }
               });
             case 2:
@@ -48,7 +59,7 @@ module.exports = {
           switch (_context2.prev = _context2.next) {
             case 0:
               _context2.next = 2;
-              return queryInterface.dropTable("payment_methods");
+              return queryInterface.dropTable("history_order_update");
             case 2:
             case "end":
               return _context2.stop();

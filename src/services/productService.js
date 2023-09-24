@@ -22,7 +22,7 @@ const handleGetCategories = async () => {
         console.log(error);
         return {
             code: ResponseCode.INTERNAL_SERVER_ERROR,
-            message: error.message || error,
+            message: "Error occurs, check again!",
         };
     }
 };
@@ -45,7 +45,7 @@ const handleGetMaterials = async () => {
         console.log(error);
         return {
             code: ResponseCode.INTERNAL_SERVER_ERROR,
-            message: error.message || error,
+            message: "Error occurs, check again!",
         };
     }
 };
@@ -69,7 +69,7 @@ const handleCountProducts = async () => {
         console.log(error);
         return {
             code: ResponseCode.INTERNAL_SERVER_ERROR,
-            message: error.message || error,
+            message: "Error occurs, check again!",
         };
     }
 };
@@ -151,25 +151,25 @@ const handleGetProducts = async (encodedSlugs, page) => {
 
         return {
             code: ResponseCode.INTERNAL_SERVER_ERROR,
-            message: error.message || error,
+            message: "Error occurs, check again!",
         };
     }
 };
 
-const handleGetProductById = async (product_id) => {
+const handleGetProductBy = async (slug) => {
     try {
         const product = await db.Product.findOne({
             attributes: {
                 exclude: ["image_url"],
             },
             where: {
-                id: product_id,
+                slug,
             },
         });
         if (product) {
             const images = await db.Image.findAll({
                 where: {
-                    target_id: product_id,
+                    target_id: product.id,
                     target_type: "product",
                 },
             });
@@ -183,14 +183,14 @@ const handleGetProductById = async (product_id) => {
 
         return {
             code: ResponseCode.FILE_NOT_FOUND,
-            message: "get products failure",
+            message: "get product failure",
         };
     } catch (error) {
         console.log(error);
 
         return {
             code: ResponseCode.INTERNAL_SERVER_ERROR,
-            message: error.message || error,
+            message: "Error occurs, check again!",
         };
     }
 };
@@ -231,7 +231,7 @@ const handleCreateProduct = async (product) => {
 
         return {
             code: ResponseCode.INTERNAL_SERVER_ERROR,
-            message: error.message || error,
+            message: "Error occurs, check again!",
         };
     }
 };
@@ -308,7 +308,7 @@ const handleUpdateProduct = async (product) => {
         console.log(error);
         return {
             code: ResponseCode.INTERNAL_SERVER_ERROR,
-            message: error.message || error,
+            message: "Error occurs, check again!",
         };
     }
 };
@@ -365,7 +365,7 @@ const handleDeleteProduct = async (product) => {
         console.log(error);
         return {
             code: ResponseCode.INTERNAL_SERVER_ERROR,
-            message: error.message || error,
+            message: "Error occurs, check again!",
         };
     }
 };
@@ -389,7 +389,7 @@ module.exports = {
     handleGetMaterials,
     handleCountProducts,
     handleGetProducts,
-    handleGetProductById,
+    handleGetProductBy,
     handleCreateProduct,
     handleUpdateProduct,
     handleDeleteProduct,

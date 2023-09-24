@@ -50,7 +50,7 @@ var handleGetCategories = /*#__PURE__*/function () {
             console.log(_context.t0);
             return _context.abrupt("return", {
               code: _constant.ResponseCode.INTERNAL_SERVER_ERROR,
-              message: _context.t0.message || _context.t0
+              message: "Error occurs, check again!"
             });
           case 13:
           case "end":
@@ -95,7 +95,7 @@ var handleGetMaterials = /*#__PURE__*/function () {
             console.log(_context2.t0);
             return _context2.abrupt("return", {
               code: _constant.ResponseCode.INTERNAL_SERVER_ERROR,
-              message: _context2.t0.message || _context2.t0
+              message: "Error occurs, check again!"
             });
           case 13:
           case "end":
@@ -140,7 +140,7 @@ var handleCountProducts = /*#__PURE__*/function () {
             console.log(_context3.t0);
             return _context3.abrupt("return", {
               code: _constant.ResponseCode.INTERNAL_SERVER_ERROR,
-              message: _context3.t0.message || _context3.t0
+              message: "Error occurs, check again!"
             });
           case 13:
           case "end":
@@ -257,7 +257,7 @@ var handleGetProducts = /*#__PURE__*/function () {
             console.log(_context4.t0);
             return _context4.abrupt("return", {
               code: _constant.ResponseCode.INTERNAL_SERVER_ERROR,
-              message: _context4.t0.message || _context4.t0
+              message: "Error occurs, check again!"
             });
           case 32:
           case "end":
@@ -270,8 +270,8 @@ var handleGetProducts = /*#__PURE__*/function () {
     return _ref4.apply(this, arguments);
   };
 }();
-var handleGetProductById = /*#__PURE__*/function () {
-  var _ref5 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee5(product_id) {
+var handleGetProductBy = /*#__PURE__*/function () {
+  var _ref5 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee5(slug) {
     var product, images;
     return _regeneratorRuntime().wrap(function _callee5$(_context5) {
       while (1) {
@@ -284,7 +284,7 @@ var handleGetProductById = /*#__PURE__*/function () {
                 exclude: ["image_url"]
               },
               where: {
-                id: product_id
+                slug: slug
               }
             });
           case 3:
@@ -296,7 +296,7 @@ var handleGetProductById = /*#__PURE__*/function () {
             _context5.next = 7;
             return _models["default"].Image.findAll({
               where: {
-                target_id: product_id,
+                target_id: product.id,
                 target_type: "product"
               }
             });
@@ -312,7 +312,7 @@ var handleGetProductById = /*#__PURE__*/function () {
           case 9:
             return _context5.abrupt("return", {
               code: _constant.ResponseCode.FILE_NOT_FOUND,
-              message: "get products failure"
+              message: "get product failure"
             });
           case 12:
             _context5.prev = 12;
@@ -320,7 +320,7 @@ var handleGetProductById = /*#__PURE__*/function () {
             console.log(_context5.t0);
             return _context5.abrupt("return", {
               code: _constant.ResponseCode.INTERNAL_SERVER_ERROR,
-              message: _context5.t0.message || _context5.t0
+              message: "Error occurs, check again!"
             });
           case 16:
           case "end":
@@ -329,7 +329,7 @@ var handleGetProductById = /*#__PURE__*/function () {
       }
     }, _callee5, null, [[0, 12]]);
   }));
-  return function handleGetProductById(_x3) {
+  return function handleGetProductBy(_x3) {
     return _ref5.apply(this, arguments);
   };
 }();
@@ -382,7 +382,7 @@ var handleCreateProduct = /*#__PURE__*/function () {
             console.log(_context6.t0);
             return _context6.abrupt("return", {
               code: _constant.ResponseCode.INTERNAL_SERVER_ERROR,
-              message: _context6.t0.message || _context6.t0
+              message: "Error occurs, check again!"
             });
           case 19:
           case "end":
@@ -478,7 +478,7 @@ var handleUpdateProduct = /*#__PURE__*/function () {
             console.log(_context7.t0);
             return _context7.abrupt("return", {
               code: _constant.ResponseCode.INTERNAL_SERVER_ERROR,
-              message: _context7.t0.message || _context7.t0
+              message: "Error occurs, check again!"
             });
           case 27:
           case "end":
@@ -564,7 +564,7 @@ var handleDeleteProduct = /*#__PURE__*/function () {
             console.log(_context8.t0);
             return _context8.abrupt("return", {
               code: _constant.ResponseCode.INTERNAL_SERVER_ERROR,
-              message: _context8.t0.message || _context8.t0
+              message: "Error occurs, check again!"
             });
           case 27:
           case "end":
@@ -603,7 +603,7 @@ module.exports = {
   handleGetMaterials: handleGetMaterials,
   handleCountProducts: handleCountProducts,
   handleGetProducts: handleGetProducts,
-  handleGetProductById: handleGetProductById,
+  handleGetProductBy: handleGetProductBy,
   handleCreateProduct: handleCreateProduct,
   handleUpdateProduct: handleUpdateProduct,
   handleDeleteProduct: handleDeleteProduct

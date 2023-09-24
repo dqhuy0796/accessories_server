@@ -59,7 +59,7 @@ var handleGetRoles = /*#__PURE__*/function () {
             console.log(_context.t0);
             return _context.abrupt("return", {
               code: _constant.ResponseCode.INTERNAL_SERVER_ERROR,
-              message: _context.t0.message || _context.t0
+              message: "Error occurs, check again!"
             });
           case 13:
           case "end":
@@ -109,7 +109,7 @@ var handleCountUsers = /*#__PURE__*/function () {
             console.log(_context2.t0);
             return _context2.abrupt("return", {
               code: _constant.ResponseCode.INTERNAL_SERVER_ERROR,
-              message: _context2.t0.message || _context2.t0
+              message: "Error occurs, check again!"
             });
           case 14:
           case "end":
@@ -210,7 +210,7 @@ var handleGetUsers = /*#__PURE__*/function () {
             console.log(_context3.t0);
             return _context3.abrupt("return", {
               code: _constant.ResponseCode.INTERNAL_SERVER_ERROR,
-              message: _context3.t0.message || _context3.t0
+              message: "Error occurs, check again!"
             });
           case 26:
           case "end":
@@ -278,7 +278,7 @@ var handleGetUserByUsername = /*#__PURE__*/function () {
             console.log(_context4.t0);
             return _context4.abrupt("return", {
               code: _constant.ResponseCode.INTERNAL_SERVER_ERROR,
-              message: _context4.t0.message || _context4.t0
+              message: "Error occurs, check again!"
             });
           case 16:
           case "end":
@@ -367,7 +367,7 @@ var handleCreateUser = /*#__PURE__*/function () {
             console.log(_context5.t0);
             return _context5.abrupt("return", {
               code: _constant.ResponseCode.INTERNAL_SERVER_ERROR,
-              message: _context5.t0.message || _context5.t0
+              message: "Error occurs, check again!"
             });
           case 24:
           case "end":
@@ -477,7 +477,7 @@ var handleUpdateUser = /*#__PURE__*/function () {
             console.log(_context6.t0);
             return _context6.abrupt("return", {
               code: _constant.ResponseCode.INTERNAL_SERVER_ERROR,
-              message: _context6.t0.message || _context6.t0
+              message: "Error occurs, check again!"
             });
           case 32:
           case "end":
@@ -536,7 +536,7 @@ var handleDeleteUser = /*#__PURE__*/function () {
             console.log(_context7.t0);
             return _context7.abrupt("return", {
               code: _constant.ResponseCode.INTERNAL_SERVER_ERROR,
-              message: _context7.t0.message || _context7.t0
+              message: "Error occurs, check again!"
             });
           case 15:
           case "end":

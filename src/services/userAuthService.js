@@ -68,7 +68,7 @@ const handleLogin = async (username, password) => {
         console.log(error);
         return {
             code: ResponseCode.INTERNAL_SERVER_ERROR,
-            message: error.message || error,
+            message: "Error occurs, check again!",
         };
     }
 };
@@ -108,7 +108,7 @@ const handleLogout = async (phone_number) => {
         console.log(error);
         return {
             code: ResponseCode.INTERNAL_SERVER_ERROR,
-            message: error.message || error,
+            message: "Error occurs, check again!",
         };
     }
 };
@@ -304,7 +304,7 @@ const handleUpdateProfile = async (profile) => {
         console.log(error);
         return {
             code: ResponseCode.INTERNAL_SERVER_ERROR,
-            message: error.message || error,
+            message: "Error occurs, check again!",
         };
     }
 };
@@ -401,7 +401,7 @@ const handleRegister = async (user) => {
         console.log(error);
         return {
             code: ResponseCode.INTERNAL_SERVER_ERROR,
-            message: error.message || error,
+            message: "Error occurs, check again!",
         };
     }
 };

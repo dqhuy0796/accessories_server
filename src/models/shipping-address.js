@@ -9,20 +9,13 @@ module.exports = (sequelize, DataTypes) => {
          */
         static associate(models) {
             // define association here
-            ShippingAddress.belongsTo(models.User, {
-                foreignKey: "user_id",
-            });
         }
     }
     ShippingAddress.init(
         {
-            address: DataTypes.STRING,
-            ward: DataTypes.STRING,
-            district: DataTypes.STRING,
-            province: DataTypes.STRING,
-            name: DataTypes.STRING,
-            phone_number: DataTypes.STRING,
-            is_default: DataTypes.BOOLEAN,
+            receiver_address: DataTypes.TEXT,
+            receiver_name: DataTypes.STRING,
+            receiver_phone: DataTypes.STRING,
         },
         {
             sequelize,

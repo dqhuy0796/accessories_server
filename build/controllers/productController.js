@@ -86,18 +86,18 @@ var countProducts = /*#__PURE__*/function () {
 
 var getProduct = /*#__PURE__*/function () {
   var _ref4 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee4(req, res) {
-    var _req$query, product_id, categories, page, _data, data;
+    var _req$query, slug, categories, page, _data, data;
     return _regeneratorRuntime().wrap(function _callee4$(_context4) {
       while (1) {
         switch (_context4.prev = _context4.next) {
           case 0:
-            _req$query = req.query, product_id = _req$query.product_id, categories = _req$query.categories, page = _req$query.page;
-            if (!product_id) {
+            _req$query = req.query, slug = _req$query.slug, categories = _req$query.categories, page = _req$query.page;
+            if (!slug) {
               _context4.next = 6;
               break;
             }
             _context4.next = 4;
-            return _productService["default"].handleGetProductById(product_id);
+            return _productService["default"].handleGetProductBy(slug);
           case 4:
             _data = _context4.sent;
             return _context4.abrupt("return", res.status(200).json(_data));

@@ -16,32 +16,36 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 var _require = require("sequelize"),
   Model = _require.Model;
 module.exports = function (sequelize, DataTypes) {
-  var Customer = /*#__PURE__*/function (_Model) {
-    _inherits(Customer, _Model);
-    var _super = _createSuper(Customer);
-    function Customer() {
-      _classCallCheck(this, Customer);
+  var ShippingAddress = /*#__PURE__*/function (_Model) {
+    _inherits(ShippingAddress, _Model);
+    var _super = _createSuper(ShippingAddress);
+    function ShippingAddress() {
+      _classCallCheck(this, ShippingAddress);
       return _super.apply(this, arguments);
     }
-    _createClass(Customer, null, [{
+    _createClass(ShippingAddress, null, [{
       key: "associate",
-      value: function associate(models) {
-        // Define associations here
+      value:
+      /**
+       * Helper method for defining associations.
+       * This method is not a part of Sequelize lifecycle.
+       * The `models/index` file will call this method automatically.
+       */
+      function associate(models) {
+        // define association here
       }
     }]);
-    return Customer;
+    return ShippingAddress;
   }(Model);
-  Customer.init({
-    name: DataTypes.STRING,
-    email: DataTypes.STRING,
-    phone_number: DataTypes.STRING,
-    address: DataTypes.STRING,
-    birth_date: DataTypes.DATEONLY,
-    loyalty_points: DataTypes.INTEGER
+  ShippingAddress.init({
+    receiver_address: DataTypes.TEXT,
+    receiver_name: DataTypes.STRING,
+    receiver_phone: DataTypes.STRING
   }, {
     sequelize: sequelize,
-    modelName: "Customer",
-    tableName: "customers"
+    modelName: "ShippingAddress",
+    tableName: "shipping_addresses",
+    timestamps: false
   });
-  return Customer;
+  return ShippingAddress;
 };

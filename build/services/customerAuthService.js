@@ -6,6 +6,7 @@ var _jsonwebtoken = _interopRequireDefault(require("jsonwebtoken"));
 var _constant = require("../constant");
 var _models = _interopRequireDefault(require("../models"));
 var _database = _interopRequireDefault(require("../config/database"));
+var _lodash = _interopRequireDefault(require("lodash"));
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
@@ -97,7 +98,7 @@ var handleLogin = /*#__PURE__*/function () {
             console.log(_context.t0);
             return _context.abrupt("return", {
               code: _constant.ResponseCode.INTERNAL_SERVER_ERROR,
-              message: _context.t0.message || _context.t0
+              message: "Error occurs, check again!"
             });
           case 24:
           case "end":
@@ -112,7 +113,7 @@ var handleLogin = /*#__PURE__*/function () {
 }();
 var handleRegister = /*#__PURE__*/function () {
   var _ref2 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee2(user) {
-    var _user$name, existedUser, hashedPassword, convertedAddress, createdUser;
+    var _user$name, existedUser, hashedPassword, createdUser, accessToken, refreshToken;
     return _regeneratorRuntime().wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
@@ -137,49 +138,66 @@ var handleRegister = /*#__PURE__*/function () {
               message: "Phone number or email already in use."
             });
           case 6:
+            if (_lodash["default"].isEqual(user.password, user.confirm_password)) {
+              _context2.next = 8;
+              break;
+            }
+            return _context2.abrupt("return", {
+              code: _constant.ResponseCode.DATABASE_ERROR,
+              message: "Confirm password do not match."
+            });
+          case 8:
             hashedPassword = hashPassword(user.password);
-            convertedAddress = handleConvertAddressType(user.address);
-            _context2.next = 10;
+            _context2.next = 11;
             return _models["default"].User.create({
               phone_number: user.phone_number,
               email: user.email,
               password: hashedPassword,
               name: (_user$name = user.name) !== null && _user$name !== void 0 ? _user$name : user.phone_number,
-              address: convertedAddress,
+              address: user.address,
               last_login: null,
               birth: null,
               role_id: 3,
               bio: null
             });
-          case 10:
+          case 11:
             createdUser = _context2.sent;
-            delete createdUser.password;
             if (!createdUser) {
-              _context2.next = 14;
+              _context2.next = 19;
               break;
             }
+            delete createdUser.password;
+            accessToken = handleGenerateAccessToken(user);
+            _context2.next = 17;
+            return handleGenerateRefreshToken(user);
+          case 17:
+            refreshToken = _context2.sent;
             return _context2.abrupt("return", {
               code: _constant.ResponseCode.SUCCESS,
               message: "Register successfully.",
-              result: createdUser
+              result: createdUser,
+              accessToken: accessToken,
+              refreshToken: refreshToken
             });
-          case 14:
-            _context2.next = 20;
-            break;
-          case 16:
-            _context2.prev = 16;
+          case 19:
+            return _context2.abrupt("return", {
+              code: _constant.ResponseCode.DATABASE_ERROR,
+              message: "Register unsuccessfully."
+            });
+          case 22:
+            _context2.prev = 22;
             _context2.t0 = _context2["catch"](0);
             console.log(_context2.t0);
             return _context2.abrupt("return", {
               code: _constant.ResponseCode.INTERNAL_SERVER_ERROR,
-              message: _context2.t0.message || _context2.t0
+              message: "Error occurs, check again!"
             });
-          case 20:
+          case 26:
           case "end":
             return _context2.stop();
         }
       }
-    }, _callee2, null, [[0, 16]]);
+    }, _callee2, null, [[0, 22]]);
   }));
   return function handleRegister(_x3) {
     return _ref2.apply(this, arguments);

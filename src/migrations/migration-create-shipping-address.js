@@ -8,29 +8,14 @@ module.exports = {
                 primaryKey: true,
                 type: Sequelize.INTEGER,
             },
-            address: {
+            receiver_address: {
+                type: Sequelize.TEXT,
+            },
+            receiver_name: {
                 type: Sequelize.STRING,
             },
-            ward: {
+            receiver_phone: {
                 type: Sequelize.STRING,
-            },
-            district: {
-                type: Sequelize.STRING,
-            },
-            province: {
-                type: Sequelize.STRING,
-            },
-            name: {
-                type: Sequelize.STRING,
-            },
-            phone_number: {
-                type: Sequelize.STRING,
-            },
-            is_default: {
-                type: Sequelize.BOOLEAN,
-            },
-            user_id: {
-                type: Sequelize.INTEGER,
             },
         });
     },

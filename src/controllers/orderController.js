@@ -1,40 +1,43 @@
 import { ResponseCode } from "../constant/index.js";
 import orderService from "../services/orderService.js";
 
-let getOrder = async (req, res) => {
-    const customerId = req.query.customerId;
-    const orderUuid = req.query.orderUuid;
+const getPaymentMethods = async (req, res) => {
+    const data = await orderService.handleGetPaymentMethods();
+    return res.status(200).json(data);
+};
 
-    if (customerId && !orderUuid) {
-        let data = await orderService.handleGetOrders(customerId);
-        return res.status(200).json(data);
-    }
+const getOrder = async (req, res) => {
+    const { order_uuid } = req.query;
 
-    if (orderUuid && !customerId) {
-        let data = await orderService.handleGetOrderById(orderUuid);
+    if (order_uuid) {
+        const data = await orderService.handleGetOrderByUuid(order_uuid);
         return res.status(200).json(data);
     }
 
     return res.status(500).json({
         code: ResponseCode.MISSING_PARAMETER,
-        message: "Missing parameter(s)",
+        message: "Missing parameter(s).",
     });
 };
 
 let createOrder = async (req, res) => {
-    const customerId = req.body.customerId;
-    const deliveryAddressId = req.body.deliveryAddressId;
-    const items = req.body.items;
-    const paymentDetails = req.body.paymentDetails;
+    const { customerPhoneNumber, items, note, paymentDetails, paymentMethod, shippingAddress } = req.body;
 
-    if (customerId && deliveryAddressId && items && paymentDetails) {
-        let data = await orderService.handleCreateOrder({ customerId, deliveryAddressId, items, paymentDetails });
+    if (customerPhoneNumber && items && paymentDetails && paymentMethod && shippingAddress) {
+        const data = await orderService.handleCreateOrder({
+            customerPhoneNumber,
+            items,
+            note,
+            paymentDetails,
+            paymentMethod,
+            shippingAddress,
+        });
         return res.status(200).json(data);
     }
 
     return res.status(500).json({
         code: ResponseCode.MISSING_PARAMETER,
-        message: "Missing parameter(s)",
+        message: "Missing parameter(s).",
     });
 };
 
@@ -114,6 +117,7 @@ let deleteOrder = async (req, res) => {
 };
 
 export default {
+    getPaymentMethods,
     getOrder,
     createOrder,
     confirmOrder,

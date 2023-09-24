@@ -30,7 +30,7 @@ const handleGetRoles = async (role_id) => {
         console.log(error);
         return {
             code: ResponseCode.INTERNAL_SERVER_ERROR,
-            message: error.message || error,
+            message: "Error occurs, check again!",
         };
     }
 };
@@ -62,7 +62,7 @@ const handleCountUsers = async (role_id) => {
         console.log(error);
         return {
             code: ResponseCode.INTERNAL_SERVER_ERROR,
-            message: error.message || error,
+            message: "Error occurs, check again!",
         };
     }
 };
@@ -139,7 +139,7 @@ const handleGetUsers = async (role_id, slug, page) => {
         console.log(error);
         return {
             code: ResponseCode.INTERNAL_SERVER_ERROR,
-            message: error.message || error,
+            message: "Error occurs, check again!",
         };
     }
 };
@@ -190,7 +190,7 @@ const handleGetUserByUsername = async (username) => {
         console.log(error);
         return {
             code: ResponseCode.INTERNAL_SERVER_ERROR,
-            message: error.message || error,
+            message: "Error occurs, check again!",
         };
     }
 };
@@ -255,7 +255,7 @@ const handleCreateUser = async (user) => {
         console.log(error);
         return {
             code: ResponseCode.INTERNAL_SERVER_ERROR,
-            message: error.message || error,
+            message: "Error occurs, check again!",
         };
     }
 };
@@ -338,7 +338,7 @@ const handleUpdateUser = async (user) => {
         console.log(error);
         return {
             code: ResponseCode.INTERNAL_SERVER_ERROR,
-            message: error.message || error,
+            message: "Error occurs, check again!",
         };
     }
 };
@@ -376,7 +376,7 @@ const handleDeleteUser = async (user) => {
         console.log(error);
         return {
             code: ResponseCode.INTERNAL_SERVER_ERROR,
-            message: error.message || error,
+            message: "Error occurs, check again!",
         };
     }
 };

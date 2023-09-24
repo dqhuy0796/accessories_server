@@ -227,13 +227,13 @@ var customerLogin = /*#__PURE__*/function () {
 }();
 var customerRegister = /*#__PURE__*/function () {
   var _ref7 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee7(req, res) {
-    var _req$body4, phone_number, email, password, name, address, data;
+    var _req$body4, phone_number, email, password, confirm_password, name, address, data;
     return _regeneratorRuntime().wrap(function _callee7$(_context7) {
       while (1) {
         switch (_context7.prev = _context7.next) {
           case 0:
-            _req$body4 = req.body, phone_number = _req$body4.phone_number, email = _req$body4.email, password = _req$body4.password, name = _req$body4.name, address = _req$body4.address;
-            if (!(phone_number && email && password && name && address)) {
+            _req$body4 = req.body, phone_number = _req$body4.phone_number, email = _req$body4.email, password = _req$body4.password, confirm_password = _req$body4.confirm_password, name = _req$body4.name, address = _req$body4.address;
+            if (!(phone_number && email && password && confirm_password && name && address)) {
               _context7.next = 6;
               break;
             }
@@ -242,6 +242,7 @@ var customerRegister = /*#__PURE__*/function () {
               phone_number: phone_number,
               email: email,
               password: password,
+              confirm_password: confirm_password,
               name: name,
               address: address
             });

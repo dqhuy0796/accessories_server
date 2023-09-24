@@ -19,10 +19,10 @@ const countProducts = async (req, res) => {
 // PRODUCT
 
 const getProduct = async (req, res) => {
-    const { product_id, categories, page } = req.query;
+    const { slug, categories, page } = req.query;
 
-    if (product_id) {
-        const data = await productService.handleGetProductById(product_id);
+    if (slug) {
+        const data = await productService.handleGetProductBy(slug);
         return res.status(200).json(data);
     }
     const data = await productService.handleGetProducts(categories, page);

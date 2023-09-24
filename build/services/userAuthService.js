@@ -95,7 +95,7 @@ var handleLogin = /*#__PURE__*/function () {
             console.log(_context.t0);
             return _context.abrupt("return", {
               code: _constant.ResponseCode.INTERNAL_SERVER_ERROR,
-              message: _context.t0.message || _context.t0
+              message: "Error occurs, check again!"
             });
           case 24:
           case "end":
@@ -151,7 +151,7 @@ var handleLogout = /*#__PURE__*/function () {
             console.log(_context2.t0);
             return _context2.abrupt("return", {
               code: _constant.ResponseCode.INTERNAL_SERVER_ERROR,
-              message: _context2.t0.message || _context2.t0
+              message: "Error occurs, check again!"
             });
           case 17:
           case "end":
@@ -414,7 +414,7 @@ var handleUpdateProfile = /*#__PURE__*/function () {
             console.log(_context5.t0);
             return _context5.abrupt("return", {
               code: _constant.ResponseCode.INTERNAL_SERVER_ERROR,
-              message: _context5.t0.message || _context5.t0
+              message: "Error occurs, check again!"
             });
           case 32:
           case "end":
@@ -558,7 +558,7 @@ var handleRegister = /*#__PURE__*/function () {
             console.log(_context7.t0);
             return _context7.abrupt("return", {
               code: _constant.ResponseCode.INTERNAL_SERVER_ERROR,
-              message: _context7.t0.message || _context7.t0
+              message: "Error occurs, check again!"
             });
           case 20:
           case "end":

@@ -16,32 +16,36 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 var _require = require("sequelize"),
   Model = _require.Model;
 module.exports = function (sequelize, DataTypes) {
-  var Customer = /*#__PURE__*/function (_Model) {
-    _inherits(Customer, _Model);
-    var _super = _createSuper(Customer);
-    function Customer() {
-      _classCallCheck(this, Customer);
+  var PaymentMethod = /*#__PURE__*/function (_Model) {
+    _inherits(PaymentMethod, _Model);
+    var _super = _createSuper(PaymentMethod);
+    function PaymentMethod() {
+      _classCallCheck(this, PaymentMethod);
       return _super.apply(this, arguments);
     }
-    _createClass(Customer, null, [{
+    _createClass(PaymentMethod, null, [{
       key: "associate",
-      value: function associate(models) {
-        // Define associations here
+      value:
+      /**
+       * Helper method for defining associations.
+       * This method is not a part of Sequelize lifecycle.
+       * The `models/index` file will call this method automatically.
+       */
+      function associate(models) {
+        // define association here
       }
     }]);
-    return Customer;
+    return PaymentMethod;
   }(Model);
-  Customer.init({
+  PaymentMethod.init({
+    slug: DataTypes.STRING,
     name: DataTypes.STRING,
-    email: DataTypes.STRING,
-    phone_number: DataTypes.STRING,
-    address: DataTypes.STRING,
-    birth_date: DataTypes.DATEONLY,
-    loyalty_points: DataTypes.INTEGER
+    description: DataTypes.TEXT
   }, {
     sequelize: sequelize,
-    modelName: "Customer",
-    tableName: "customers"
+    modelName: "PaymentMethod",
+    tableName: "payment_methods",
+    timestamps: false
   });
-  return Customer;
+  return PaymentMethod;
 };

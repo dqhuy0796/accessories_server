@@ -2,6 +2,29 @@ import db from "../models";
 import { OrderStateCode, ResponseCode } from "../constant";
 import sequelize from "../config/database";
 
+const handleGetPaymentMethods = async () => {
+    try {
+        const paymentMethods = await db.PaymentMethod.findAll();
+        if (paymentMethods) {
+            return {
+                code: ResponseCode.SUCCESS,
+                message: "get payment methods successfully",
+                result: paymentMethods,
+            };
+        }
+        return {
+            code: ResponseCode.FILE_NOT_FOUND,
+            message: "get payment methods failure",
+        };
+    } catch (error) {
+        console.log(error);
+        return {
+            code: ResponseCode.INTERNAL_SERVER_ERROR,
+            message: "Error occurs, check again!",
+        };
+    }
+};
+
 const handleGetOrders = async (customerId) => {
     try {
         if (!customerId) {
@@ -117,41 +140,57 @@ const handleGetOrders = async (customerId) => {
 //     }
 // };
 
-const handleGetOrderById = async (orderUuid) => {
+const handleGetOrderByUuid = async (order_uuid) => {
+    const t = sequelize.transaction();
     try {
-        if (!orderUuid) {
-            return {
-                code: ResponseCode.MISSING_PARAMETER,
-                message: "Missing parameter(s).",
-            };
-        }
-
         const order = await db.Order.findOne({
-            where: { orderUuid },
+            where: {
+                order_uuid,
+            },
         });
 
-        if (!order) {
+        if (order) {
+            const { id, shipping_address_id, payment_method_id, status_id, ...rest } = order;
+
+            const [order_status, order_details, shipping_address, payment_method] = await Promise.all([
+                db.Status.findOne({
+                    where: {
+                        id: status_id,
+                    },
+                }),
+                db.OrderDetail.findAll({
+                    where: {
+                        order_uuid,
+                    },
+                }),
+                db.ShippingAddress.findOne({
+                    where: {
+                        id: shipping_address_id,
+                    },
+                }),
+                db.PaymentMethod.findOne({
+                    where: {
+                        id: payment_method_id,
+                    },
+                }),
+            ]);
+
             return {
-                code: ResponseCode.FILE_NOT_FOUND,
-                message: `Order ${orderUuid} not found.`,
+                code: ResponseCode.SUCCESS,
+                message: `Retrieved order ${order_uuid} successfully`,
+                result: {
+                    ...rest,
+                    status: order_status,
+                    item: order_details,
+                    shipping_address,
+                    payment_method,
+                },
             };
         }
 
-        const [orderStates, orderDetails, deliveryAddress] = await Promise.all([
-            db.OrderState.findAll({ where: { orderUuid } }),
-            db.ViewOrderDetails.findAll({ where: { orderUuid } }),
-            db.DeliveryAddress.findOne({ where: { id: order.deliveryAddressId } }),
-        ]);
-
         return {
-            code: ResponseCode.SUCCESS,
-            message: `Retrieved order ${orderUuid} successfully`,
-            result: {
-                ...order,
-                items: orderDetails,
-                states: orderStates,
-                deliveryAddress: deliveryAddress,
-            },
+            code: ResponseCode.FILE_NOT_FOUND,
+            message: `Order ${order_uuid} not found.`,
         };
     } catch (error) {
         console.log(error);
@@ -170,37 +209,55 @@ const handleCreateOrder = async (order) => {
         const thisMoment = new Date();
         const datetimeUuid = thisMoment.valueOf();
 
+        const { customerPhoneNumber, items, note, paymentDetails, paymentMethod, shippingAddress } = order;
+
+        const [shipping_adddress, created] = await db.ShippingAddress.findOrCreate({
+            where: {
+                ...shippingAddress,
+            },
+            defaults: shippingAddress,
+            transaction: t,
+        });
+
         const orderDataToInsert = {
-            orderUuid: datetimeUuid,
-            customerId: order.customerId,
-            deliveryAddressId: order.deliveryAddressId,
-            subtotal: order.paymentDetails.subtotal,
-            note: order.paymentDetails?.note || "",
+            order_uuid: datetimeUuid,
+            customer_phone_number: customerPhoneNumber,
+            shipping_address_id: shipping_adddress.id,
+            payment_method_id: paymentMethod.id,
+            ...paymentDetails,
+            status_id: 1,
+            note,
         };
 
-        const orderItemsToInsert = order.items.map((item) => ({
-            orderUuid: datetimeUuid,
-            productId: item.id,
-            quantity: item.quantity,
-            price: item.newPrice,
+        const orderItemsToInsert = items.map(({ id, name, slug, price, quantity, feature_image_url }) => ({
+            order_uuid: datetimeUuid,
+            product_id: id,
+            slug,
+            name,
+            price,
+            quantity,
+            feature_image_url,
         }));
 
-        const orderStateToInsert = {
-            orderUuid: datetimeUuid,
-            stateCode: OrderStateCode.PROCESSED,
-            stateDesc: "Chờ xử lý",
+        const historyDataToInsert = {
+            order_uuid: datetimeUuid,
+            employee_id: null,
+            status_id: 1,
+            description: `Khách ${customerPhoneNumber} đặt hàng`,
         };
 
-        await db.Order.create(orderDataToInsert, { transaction: t });
-        await db.OrderState.create(orderStateToInsert, { transaction: t });
-        await db.OrderDetails.bulkCreate(orderItemsToInsert, { transaction: t });
+        await Promise.all([
+            db.Order.create(orderDataToInsert, { transaction: t }),
+            db.OrderDetail.bulkCreate(orderItemsToInsert, { transaction: t }),
+            db.HistoryOrderUpdate.create(historyDataToInsert, { transaction: t }),
+        ]);
 
         await t.commit();
 
         return {
             code: ResponseCode.SUCCESS,
             message: "Create order successfully",
-            orderUuid: datetimeUuid,
+            result: datetimeUuid,
         };
     } catch (error) {
         await t.rollback();
@@ -403,8 +460,9 @@ let handleDeleteOrder = (orderId) => {
 };
 
 module.exports = {
+    handleGetPaymentMethods,
     handleGetOrders,
-    handleGetOrderById,
+    handleGetOrderByUuid,
     handleCreateOrder,
     handleConfirmOrder,
     handleDeliveryOrder,

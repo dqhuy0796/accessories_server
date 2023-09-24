@@ -55,7 +55,10 @@ let initRoutes = (app) => {
 
     /** ORDER */
 
-    router.get("/api/order/get", verifyAccessToken, orderController.getOrder);
+    router.post("/api/order/checkout", verifyAccessToken, orderController.createOrder);
+
+    router.get("/api/payment-method/get", orderController.getPaymentMethods);
+    router.get("/api/order/get", orderController.getOrder);
     router.post("/api/order/create", verifyAccessToken, orderController.createOrder);
     router.post("/api/order/confirm", verifyAccessToken, orderController.confirmOrder);
     router.post("/api/order/delivery", verifyAccessToken, orderController.deliveryOrder);

@@ -4,6 +4,7 @@ import { ResponseCode } from "../constant";
 import db from "../models";
 const { Op } = require("sequelize");
 import sequelize from "../config/database";
+import _ from "lodash";
 
 /** CUSTOMER */
 
@@ -70,7 +71,7 @@ const handleLogin = async (username, password) => {
         console.log(error);
         return {
             code: ResponseCode.INTERNAL_SERVER_ERROR,
-            message: error.message || error,
+            message: "Error occurs, check again!",
         };
     }
 };
@@ -97,34 +98,48 @@ const handleRegister = async (user) => {
             };
         }
 
+        if (!_.isEqual(user.password, user.confirm_password)) {
+            return {
+                code: ResponseCode.DATABASE_ERROR,
+                message: "Confirm password do not match.",
+            };
+        }
+
         const hashedPassword = hashPassword(user.password);
-        const convertedAddress = handleConvertAddressType(user.address);
         const createdUser = await db.User.create({
             phone_number: user.phone_number,
             email: user.email,
             password: hashedPassword,
             name: user.name ?? user.phone_number,
-            address: convertedAddress,
+            address: user.address,
             last_login: null,
             birth: null,
             role_id: 3,
             bio: null,
         });
 
-        delete createdUser.password;
-
         if (createdUser) {
+            delete createdUser.password;
+            const accessToken = handleGenerateAccessToken(user);
+            const refreshToken = await handleGenerateRefreshToken(user);
             return {
                 code: ResponseCode.SUCCESS,
                 message: "Register successfully.",
                 result: createdUser,
+                accessToken,
+                refreshToken,
             };
         }
+
+        return {
+            code: ResponseCode.DATABASE_ERROR,
+            message: "Register unsuccessfully.",
+        };
     } catch (error) {
         console.log(error);
         return {
             code: ResponseCode.INTERNAL_SERVER_ERROR,
-            message: error.message || error,
+            message: "Error occurs, check again!",
         };
     }
 };

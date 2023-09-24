@@ -102,10 +102,17 @@ let customerLogin = async (req, res) => {
 };
 
 const customerRegister = async (req, res) => {
-    const { phone_number, email, password, name, address } = req.body;
+    const { phone_number, email, password, confirm_password, name, address } = req.body;
 
-    if (phone_number && email && password && name && address) {
-        const data = await customerAuthService.handleRegister({ phone_number, email, password, name, address });
+    if (phone_number && email && password && confirm_password && name && address) {
+        const data = await customerAuthService.handleRegister({
+            phone_number,
+            email,
+            password,
+            confirm_password,
+            name,
+            address,
+        });
         return res.status(200).json(data);
     }
 

@@ -16,32 +16,36 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 var _require = require("sequelize"),
   Model = _require.Model;
 module.exports = function (sequelize, DataTypes) {
-  var Customer = /*#__PURE__*/function (_Model) {
-    _inherits(Customer, _Model);
-    var _super = _createSuper(Customer);
-    function Customer() {
-      _classCallCheck(this, Customer);
+  var HistoryOrderUpdate = /*#__PURE__*/function (_Model) {
+    _inherits(HistoryOrderUpdate, _Model);
+    var _super = _createSuper(HistoryOrderUpdate);
+    function HistoryOrderUpdate() {
+      _classCallCheck(this, HistoryOrderUpdate);
       return _super.apply(this, arguments);
     }
-    _createClass(Customer, null, [{
+    _createClass(HistoryOrderUpdate, null, [{
       key: "associate",
       value: function associate(models) {
         // Define associations here
+        HistoryOrderUpdate.belongsTo(models.User, {
+          foreignKey: "employee_id"
+        });
+        HistoryOrderUpdate.belongsTo(models.Order, {
+          foreignKey: "order_uuid"
+        });
+        HistoryOrderUpdate.belongsTo(models.Status, {
+          foreignKey: "status_id"
+        });
       }
     }]);
-    return Customer;
+    return HistoryOrderUpdate;
   }(Model);
-  Customer.init({
-    name: DataTypes.STRING,
-    email: DataTypes.STRING,
-    phone_number: DataTypes.STRING,
-    address: DataTypes.STRING,
-    birth_date: DataTypes.DATEONLY,
-    loyalty_points: DataTypes.INTEGER
+  HistoryOrderUpdate.init({
+    description: DataTypes.TEXT
   }, {
     sequelize: sequelize,
-    modelName: "Customer",
-    tableName: "customers"
+    modelName: "HistoryOrderUpdate",
+    tableName: "history_order_update"
   });
-  return Customer;
+  return HistoryOrderUpdate;
 };

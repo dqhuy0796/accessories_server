@@ -22,9 +22,6 @@ module.exports = {
                 order_uuid: {
                   type: Sequelize.STRING
                 },
-                shipping_address: {
-                  type: Sequelize.TEXT
-                },
                 note: {
                   type: Sequelize.TEXT
                 },
@@ -37,13 +34,16 @@ module.exports = {
                 shipping_fee: {
                   type: Sequelize.DOUBLE
                 },
-                total_amount: {
+                total: {
                   type: Sequelize.DECIMAL
                 },
-                customer_id: {
-                  type: Sequelize.INTEGER
+                customer_phone_number: {
+                  type: Sequelize.STRING
                 },
                 employee_id: {
+                  type: Sequelize.INTEGER
+                },
+                shipping_address_id: {
                   type: Sequelize.INTEGER
                 },
                 payment_method_id: {

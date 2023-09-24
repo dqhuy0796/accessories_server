@@ -16,32 +16,43 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 var _require = require("sequelize"),
   Model = _require.Model;
 module.exports = function (sequelize, DataTypes) {
-  var Customer = /*#__PURE__*/function (_Model) {
-    _inherits(Customer, _Model);
-    var _super = _createSuper(Customer);
-    function Customer() {
-      _classCallCheck(this, Customer);
+  var OrderDetail = /*#__PURE__*/function (_Model) {
+    _inherits(OrderDetail, _Model);
+    var _super = _createSuper(OrderDetail);
+    function OrderDetail() {
+      _classCallCheck(this, OrderDetail);
       return _super.apply(this, arguments);
     }
-    _createClass(Customer, null, [{
+    _createClass(OrderDetail, null, [{
       key: "associate",
-      value: function associate(models) {
-        // Define associations here
+      value:
+      /**
+       * Helper method for defining associations.
+       * This method is not a part of Sequelize lifecycle.
+       * The `models/index` file will call this method automatically.
+       */
+      function associate(models) {
+        OrderDetail.belongsTo(models.Order, {
+          foreignKey: "order_uuid"
+        });
+        OrderDetail.belongsTo(models.Product, {
+          foreignKey: "product_id"
+        });
       }
     }]);
-    return Customer;
+    return OrderDetail;
   }(Model);
-  Customer.init({
+  OrderDetail.init({
+    slug: DataTypes.STRING,
     name: DataTypes.STRING,
-    email: DataTypes.STRING,
-    phone_number: DataTypes.STRING,
-    address: DataTypes.STRING,
-    birth_date: DataTypes.DATEONLY,
-    loyalty_points: DataTypes.INTEGER
+    feature_image_url: DataTypes.TEXT,
+    price: DataTypes.DOUBLE,
+    quantity: DataTypes.INTEGER
   }, {
     sequelize: sequelize,
-    modelName: "Customer",
-    tableName: "customers"
+    modelName: "OrderDetail",
+    tableName: "order_details",
+    timestamps: false
   });
-  return Customer;
+  return OrderDetail;
 };

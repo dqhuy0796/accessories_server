@@ -8,14 +8,23 @@ module.exports = {
                 primaryKey: true,
                 type: Sequelize.INTEGER,
             },
+            slug: {
+                type: Sequelize.STRING,
+            },
+            name: {
+                type: Sequelize.STRING,
+            },
+            feature_image_url: {
+                type: Sequelize.TEXT,
+            },
             price: {
                 type: Sequelize.DOUBLE,
             },
             quantity: {
                 type: Sequelize.INTEGER,
             },
-            order_id: {
-                type: Sequelize.INTEGER,
+            order_uuid: {
+                type: Sequelize.STRING,
             },
             product_id: {
                 type: Sequelize.INTEGER,
