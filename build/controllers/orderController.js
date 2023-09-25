@@ -36,27 +36,47 @@ var getPaymentMethods = /*#__PURE__*/function () {
 }();
 var getOrder = /*#__PURE__*/function () {
   var _ref2 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee2(req, res) {
-    var order_uuid, data;
+    var _req$query, order_uuid, encoded_uuids, phone_number, data, _data, _data2;
     return _regeneratorRuntime().wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
-            order_uuid = req.query.order_uuid;
+            _req$query = req.query, order_uuid = _req$query.order_uuid, encoded_uuids = _req$query.encoded_uuids, phone_number = _req$query.phone_number;
             if (!order_uuid) {
               _context2.next = 6;
               break;
             }
             _context2.next = 4;
-            return _orderService["default"].handleGetOrderByUuid(order_uuid);
+            return _orderService["default"].handleGetOneOrderByUuid(order_uuid);
           case 4:
             data = _context2.sent;
             return _context2.abrupt("return", res.status(200).json(data));
           case 6:
+            if (!encoded_uuids) {
+              _context2.next = 11;
+              break;
+            }
+            _context2.next = 9;
+            return _orderService["default"].handleGetOrdersByUuids(encoded_uuids);
+          case 9:
+            _data = _context2.sent;
+            return _context2.abrupt("return", res.status(200).json(_data));
+          case 11:
+            if (!phone_number) {
+              _context2.next = 16;
+              break;
+            }
+            _context2.next = 14;
+            return _orderService["default"].handleGetOrdersByUserPhoneNumber(phone_number);
+          case 14:
+            _data2 = _context2.sent;
+            return _context2.abrupt("return", res.status(200).json(_data2));
+          case 16:
             return _context2.abrupt("return", res.status(500).json({
               code: _index.ResponseCode.MISSING_PARAMETER,
               message: "Missing parameter(s)."
             }));
-          case 7:
+          case 17:
           case "end":
             return _context2.stop();
         }

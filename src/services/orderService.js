@@ -1,6 +1,7 @@
 import db from "../models";
 import { OrderStateCode, ResponseCode } from "../constant";
 import sequelize from "../config/database";
+import _ from "lodash";
 
 const handleGetPaymentMethods = async () => {
     try {
@@ -140,7 +141,7 @@ const handleGetOrders = async (customerId) => {
 //     }
 // };
 
-const handleGetOrderByUuid = async (order_uuid) => {
+const handleGetOneOrderByUuid = async (order_uuid) => {
     const t = sequelize.transaction();
     try {
         const order = await db.Order.findOne({
@@ -198,6 +199,167 @@ const handleGetOrderByUuid = async (order_uuid) => {
         return {
             code: ResponseCode.DATABASE_ERROR,
             message: "An error occurred while retrieving the order.",
+        };
+    }
+};
+
+const handleGetOrdersByUuids = async (encodedUuids) => {
+    const t = sequelize.transaction();
+    try {
+        const decodedUuids = decodeURIComponent(encodedUuids);
+
+        if (_.isEmpty(decodedUuids)) {
+            return {
+                code: ResponseCode.FILE_NOT_FOUND,
+                message: `Orders not found.`,
+            };
+        }
+
+        const uuids = decodedUuids.split(",");
+        const orders = await db.Order.findAll({
+            where: {
+                order_uuid: uuids,
+            },
+        });
+
+        if (orders.length > 0) {
+            const [orderDetails, orderStatuses, shippingAddresses, paymentMethods] = await Promise.all([
+                db.OrderDetail.findAll({
+                    where: {
+                        order_uuid: uuids,
+                    },
+                }),
+                db.Status.findAll({
+                    where: {
+                        id: orders.map((order) => order.status_id),
+                    },
+                }),
+                db.ShippingAddress.findAll({
+                    where: {
+                        id: orders.map((order) => order.shipping_address_id),
+                    },
+                }),
+                db.PaymentMethod.findAll({
+                    where: {
+                        id: orders.map((order) => order.payment_method_id),
+                    },
+                }),
+            ]);
+
+            const result = orders.map((order) => {
+                const { id, order_uuid, shipping_address_id, payment_method_id, status_id, ...rest } = order;
+
+                const orderStatus = orderStatuses.find((status) => status.id === status_id);
+                const orderDetail = orderDetails.filter((detail) => detail.order_uuid === order_uuid);
+                const shippingAddress = shippingAddresses.find((address) => address.id === shipping_address_id);
+                const paymentMethod = paymentMethods.find((method) => method.id === payment_method_id);
+
+                return {
+                    ...rest,
+                    order_uuid,
+                    status: orderStatus,
+                    items: orderDetail,
+                    shipping_address: shippingAddress,
+                    payment_method: paymentMethod,
+                };
+            });
+
+            return {
+                code: ResponseCode.SUCCESS,
+                message: `Retrieved orders successfully`,
+                result,
+            };
+        }
+
+        return {
+            code: ResponseCode.FILE_NOT_FOUND,
+            message: `Orders not found.`,
+        };
+    } catch (error) {
+        console.log(error);
+
+        return {
+            code: ResponseCode.DATABASE_ERROR,
+            message: "An error occurred while retrieving the orders.",
+        };
+    }
+};
+
+const handleGetOrdersByUserPhoneNumber = async (phone_number) => {
+    const t = sequelize.transaction();
+    try {
+        const user = await db.User.findOne({
+            where: {
+                phone_number,
+            },
+        });
+
+        if (user) {
+            const orders = await db.Order.findAll({
+                where: {
+                    customer_phone_number: user.phone_number,
+                },
+            });
+
+            if (orders.length > 0) {
+                const [orderDetails, orderStatuses, shippingAddresses, paymentMethods] = await Promise.all([
+                    db.OrderDetail.findAll({
+                        where: {
+                            order_uuid: orders.map((order) => order.order_uuid),
+                        },
+                    }),
+                    db.Status.findAll({
+                        where: {
+                            id: orders.map((order) => order.status_id),
+                        },
+                    }),
+                    db.ShippingAddress.findAll({
+                        where: {
+                            id: orders.map((order) => order.shipping_address_id),
+                        },
+                    }),
+                    db.PaymentMethod.findAll({
+                        where: {
+                            id: orders.map((order) => order.payment_method_id),
+                        },
+                    }),
+                ]);
+
+                const result = orders.map((order) => {
+                    const { id, shipping_address_id, payment_method_id, status_id, ...rest } = order;
+
+                    const orderDetail = orderDetails.filter((detail) => detail.order_uuid === order.order_uuid);
+                    const orderStatus = orderStatuses.find((status) => status.id === status_id);
+                    const shippingAddress = shippingAddresses.find((address) => address.id === shipping_address_id);
+                    const paymentMethod = paymentMethods.find((method) => method.id === payment_method_id);
+
+                    return {
+                        ...rest,
+                        status: orderStatus,
+                        items: orderDetail,
+                        shipping_address: shippingAddress,
+                        payment_method: paymentMethod,
+                    };
+                });
+
+                return {
+                    code: ResponseCode.SUCCESS,
+                    message: `Retrieved orders successfully`,
+                    result,
+                };
+            }
+        }
+
+        return {
+            code: ResponseCode.FILE_NOT_FOUND,
+            message: `Orders not found.`,
+        };
+    } catch (error) {
+        console.log(error);
+
+        return {
+            code: ResponseCode.DATABASE_ERROR,
+            message: "An error occurred while retrieving the orders.",
         };
     }
 };
@@ -462,7 +624,9 @@ let handleDeleteOrder = (orderId) => {
 module.exports = {
     handleGetPaymentMethods,
     handleGetOrders,
-    handleGetOrderByUuid,
+    handleGetOneOrderByUuid,
+    handleGetOrdersByUuids,
+    handleGetOrdersByUserPhoneNumber,
     handleCreateOrder,
     handleConfirmOrder,
     handleDeliveryOrder,

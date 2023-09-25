@@ -2,25 +2,27 @@
 const { Model } = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
-    class CountCategoryProductView extends Model {
+    class CountProductByColorView extends Model {
         static associate(models) {
             // Define associations here
         }
     }
 
-    CountCategoryProductView.init(
+    CountProductByColorView.init(
         {
-            name: DataTypes.STRING,
-            slug: DataTypes.STRING,
+            name: {
+                type: DataTypes.STRING,
+                primaryKey: true,
+            },
             product_count: DataTypes.INTEGER,
         },
         {
             sequelize,
-            modelName: "CountCategoryProductView",
-            tableName: "count_category_product_view",
+            modelName: "CountProductByColorView",
+            tableName: "count_product_by_color_view",
             timestamps: false,
         },
     );
 
-    return CountCategoryProductView;
+    return CountProductByColorView;
 };

@@ -16,30 +16,30 @@ function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.g
 var _require = require("sequelize"),
   Model = _require.Model;
 module.exports = function (sequelize, DataTypes) {
-  var CountCategoryProductView = /*#__PURE__*/function (_Model) {
-    _inherits(CountCategoryProductView, _Model);
-    var _super = _createSuper(CountCategoryProductView);
-    function CountCategoryProductView() {
-      _classCallCheck(this, CountCategoryProductView);
+  var CountProductByCategoryView = /*#__PURE__*/function (_Model) {
+    _inherits(CountProductByCategoryView, _Model);
+    var _super = _createSuper(CountProductByCategoryView);
+    function CountProductByCategoryView() {
+      _classCallCheck(this, CountProductByCategoryView);
       return _super.apply(this, arguments);
     }
-    _createClass(CountCategoryProductView, null, [{
+    _createClass(CountProductByCategoryView, null, [{
       key: "associate",
       value: function associate(models) {
         // Define associations here
       }
     }]);
-    return CountCategoryProductView;
+    return CountProductByCategoryView;
   }(Model);
-  CountCategoryProductView.init({
+  CountProductByCategoryView.init({
     name: DataTypes.STRING,
     slug: DataTypes.STRING,
     product_count: DataTypes.INTEGER
   }, {
     sequelize: sequelize,
-    modelName: "CountCategoryProductView",
-    tableName: "count_category_product_view",
+    modelName: "CountProductByCategoryView",
+    tableName: "count_product_by_category_view",
     timestamps: false
   });
-  return CountCategoryProductView;
+  return CountProductByCategoryView;
 };

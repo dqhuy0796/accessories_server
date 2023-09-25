@@ -7,10 +7,20 @@ const getPaymentMethods = async (req, res) => {
 };
 
 const getOrder = async (req, res) => {
-    const { order_uuid } = req.query;
+    const { order_uuid, encoded_uuids, phone_number } = req.query;
 
     if (order_uuid) {
-        const data = await orderService.handleGetOrderByUuid(order_uuid);
+        const data = await orderService.handleGetOneOrderByUuid(order_uuid);
+        return res.status(200).json(data);
+    }
+
+    if (encoded_uuids) {
+        const data = await orderService.handleGetOrdersByUuids(encoded_uuids);
+        return res.status(200).json(data);
+    }
+
+    if (phone_number) {
+        const data = await orderService.handleGetOrdersByUserPhoneNumber(phone_number);
         return res.status(200).json(data);
     }
 

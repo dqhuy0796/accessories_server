@@ -52,18 +52,29 @@ const handleGetMaterials = async () => {
 
 const handleCountProducts = async () => {
     try {
-        const countByCategory = await db.CountCategoryProductView.findAll();
+        const [count_by_category, count_by_material, count_by_color] = await Promise.all([
+            db.CountProductByCategoryView.findAll(),
+            db.CountProductByMaterialView.findAll(),
+            db.CountProductByColorView.findAll(),
+        ]);
 
-        if (countByCategory) {
-            return {
-                code: ResponseCode.SUCCESS,
-                message: "get products count by category successfully",
-                result: countByCategory,
-            };
-        }
         return {
-            code: ResponseCode.FILE_NOT_FOUND,
-            message: "get products count by category failure",
+            code: ResponseCode.SUCCESS,
+            message: "get products count by category successfully",
+            result: [
+                {
+                    count_by: "category",
+                    data: count_by_category ?? [],
+                },
+                {
+                    count_by: "material",
+                    data: count_by_material ?? [],
+                },
+                {
+                    count_by: "color",
+                    data: count_by_color ?? [],
+                },
+            ],
         };
     } catch (error) {
         console.log(error);
