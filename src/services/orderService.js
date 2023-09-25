@@ -26,120 +26,72 @@ const handleGetPaymentMethods = async () => {
     }
 };
 
-const handleGetOrders = async (customerId) => {
+const handleGetAllOrders = async (status_id, page) => {
+    const t = sequelize.transaction();
+    const currentPage = page && !_.isNaN(page) ? page : 1;
     try {
-        if (!customerId) {
-            return {
-                code: ResponseCode.MISSING_PARAMETER,
-                message: "Missing parameter(s).",
-            };
-        }
-
-        let orderFilter = {};
-
-        if (customerId !== "all") {
-            orderFilter = { customerId };
-        }
-
-        const orders = await db.Order.findAll({
-            where: orderFilter,
+        const { count, rows: orders } = await db.Order.findAndCountAll({
             order: [["id", "DESC"]],
+            limit: 12,
+            offset: (currentPage - 1) * 12,
         });
 
-        const orderUuids = orders.map((order) => order.orderUuid);
-        const orderAddressIds = orders.map((order) => order.deliveryAddressId);
+        if (count > 0) {
+            const [orderDetails, shippingAddresses, paymentMethods, orderStatuses] = await Promise.all([
+                db.OrderDetail.findAll({
+                    where: {
+                        order_uuid: orders.map((order) => order.order_uuid),
+                    },
+                }),
+                db.ShippingAddress.findAll({
+                    where: {
+                        id: orders.map((order) => order.shipping_address_id),
+                    },
+                }),
+                db.PaymentMethod.findAll(),
+                db.Status.findAll(),
+            ]);
 
-        const [orderStates, orderDetails, orderDeliveryAddresses] = await Promise.all([
-            db.OrderState.findAll({ where: { orderUuid: orderUuids } }),
-            db.ViewOrderDetails.findAll({ where: { orderUuid: orderUuids } }),
-            db.DeliveryAddress.findAll({ where: { id: orderAddressIds } }),
-        ]);
+            const result = orders.map((order) => {
+                const { id, shipping_address_id, payment_method_id, status_id, ...rest } = order;
 
-        const result = orders.map((item) => {
-            const items = orderDetails.filter((details) => details.orderUuid === item.orderUuid);
-            const states = orderStates.filter((states) => states.orderUuid === item.orderUuid);
-            const deliveryAddress = orderDeliveryAddresses.find((address) => address.id === item.deliveryAddressId);
+                const orderStatus = orderStatuses.find((status) => status.id === status_id);
+                const orderDetail = orderDetails.filter((detail) => detail.order_uuid === order.order_uuid);
+                const shippingAddress = shippingAddresses.find((address) => address.id === shipping_address_id);
+                const paymentMethod = paymentMethods.find((method) => method.id === payment_method_id);
+
+                return {
+                    ...rest,
+                    status: orderStatus,
+                    items: orderDetail,
+                    shipping_address: shippingAddress,
+                    payment_method: paymentMethod,
+                };
+            });
 
             return {
-                ...item,
-                items,
-                states,
-                deliveryAddress,
+                code: ResponseCode.SUCCESS,
+                message: `Retrieved orders successfully`,
+                page: currentPage,
+                total_pages: Math.ceil(count / 12),
+                total_results: count,
+                result,
             };
-        });
+        }
 
         return {
-            code: ResponseCode.SUCCESS,
-            message: "Retrieved orders successfully",
-            result: result,
+            code: ResponseCode.FILE_NOT_FOUND,
+            message: `Orders not found.`,
         };
     } catch (error) {
         console.log(error);
 
         return {
             code: ResponseCode.DATABASE_ERROR,
-            message: "An error occurred while retrieving the order.",
+            message: "An error occurred while retrieving the orders.",
         };
     }
 };
-
-// const handleGetOrders = async (customerId) => {
-//     try {
-//         if (!customerId) {
-//             return {
-//                 code: ResponseCode.MISSING_PARAMETER,
-//                 message: "Missing parameter(s).",
-//             };
-//         }
-
-//         if (customerId === "all") {
-//                         const allOrders = await db.Order.findAll({
-//                 include: [
-//                     {
-//                         model: db.OrderState,
-//                     },
-//                     {
-//                         model: db.OrderDetails,
-//                     },
-//                 ],
-//             });
-
-//             return {
-//                 code: ResponseCode.SUCCESS,
-//                 message: "Retrieved orders successfully",
-//                 result: allOrders,
-//             };
-//         }
-
-//         const orders = await db.Order.findAll({
-//             where: { customerId: Number(customerId) },
-//             attributes: ["orderUuid", "customerId", "deliveryAddressId", "subtotal", "note"],
-//             include: [
-//                 {
-//                     model: db.OrderState,
-//                     attributes: ["stateCode", "stateDesc"],
-//                 },
-//                 {
-//                     model: db.OrderDetails,
-//                     attributes: ["productId", "quantity", "price"],
-//                 },
-//             ],
-//         });
-
-//         return {
-//             code: ResponseCode.SUCCESS,
-//             message: "Retrieved orders successfully",
-//             result: orders,
-//         };
-//     } catch (error) {
-//         console.log(error);
-
-//         return {
-//             code: ResponseCode.DATABASE_ERROR,
-//             message: "An error occurred while retrieving the order.",
-//         };
-//     }
-// };
 
 const handleGetOneOrderByUuid = async (order_uuid) => {
     const t = sequelize.transaction();
@@ -153,7 +105,7 @@ const handleGetOneOrderByUuid = async (order_uuid) => {
         if (order) {
             const { id, shipping_address_id, payment_method_id, status_id, ...rest } = order;
 
-            const [order_status, order_details, shipping_address, payment_method] = await Promise.all([
+            const [order_status, order_details, shipping_address, payment_method, history] = await Promise.all([
                 db.Status.findOne({
                     where: {
                         id: status_id,
@@ -174,6 +126,11 @@ const handleGetOneOrderByUuid = async (order_uuid) => {
                         id: payment_method_id,
                     },
                 }),
+                db.HistoryOrderUpdateStatusView.findAll({
+                    where: {
+                        order_uuid,
+                    },
+                }),
             ]);
 
             return {
@@ -182,9 +139,10 @@ const handleGetOneOrderByUuid = async (order_uuid) => {
                 result: {
                     ...rest,
                     status: order_status,
-                    item: order_details,
+                    items: order_details,
                     shipping_address,
                     payment_method,
+                    history,
                 },
             };
         }
@@ -247,16 +205,15 @@ const handleGetOrdersByUuids = async (encodedUuids) => {
             ]);
 
             const result = orders.map((order) => {
-                const { id, order_uuid, shipping_address_id, payment_method_id, status_id, ...rest } = order;
+                const { id, shipping_address_id, payment_method_id, status_id, ...rest } = order;
 
                 const orderStatus = orderStatuses.find((status) => status.id === status_id);
-                const orderDetail = orderDetails.filter((detail) => detail.order_uuid === order_uuid);
+                const orderDetail = orderDetails.filter((detail) => detail.order_uuid === order.order_uuid);
                 const shippingAddress = shippingAddresses.find((address) => address.id === shipping_address_id);
                 const paymentMethod = paymentMethods.find((method) => method.id === payment_method_id);
 
                 return {
                     ...rest,
-                    order_uuid,
                     status: orderStatus,
                     items: orderDetail,
                     shipping_address: shippingAddress,
@@ -623,7 +580,7 @@ let handleDeleteOrder = (orderId) => {
 
 module.exports = {
     handleGetPaymentMethods,
-    handleGetOrders,
+    handleGetAllOrders,
     handleGetOneOrderByUuid,
     handleGetOrdersByUuids,
     handleGetOrdersByUserPhoneNumber,

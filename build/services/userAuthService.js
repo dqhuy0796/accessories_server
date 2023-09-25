@@ -36,9 +36,11 @@ var handleLogin = /*#__PURE__*/function () {
             _context.next = 3;
             return _models["default"].User.findOne({
               where: _defineProperty({}, Op.or, [{
-                phone_number: username
+                phone_number: username,
+                role_id: _defineProperty({}, Op.lt, 3)
               }, {
-                email: username
+                email: username,
+                role_id: _defineProperty({}, Op.lt, 3)
               }])
             });
           case 3:

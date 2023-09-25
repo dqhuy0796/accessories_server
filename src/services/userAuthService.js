@@ -14,9 +14,15 @@ const handleLogin = async (username, password) => {
                 [Op.or]: [
                     {
                         phone_number: username,
+                        role_id: {
+                            [Op.lt]: 3,
+                        },
                     },
                     {
                         email: username,
+                        role_id: {
+                            [Op.lt]: 3,
+                        },
                     },
                 ],
             },

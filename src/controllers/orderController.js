@@ -1,5 +1,6 @@
 import { ResponseCode } from "../constant/index.js";
 import orderService from "../services/orderService.js";
+const jwt = require("jsonwebtoken");
 
 const getPaymentMethods = async (req, res) => {
     const data = await orderService.handleGetPaymentMethods();
@@ -28,6 +29,26 @@ const getOrder = async (req, res) => {
         code: ResponseCode.MISSING_PARAMETER,
         message: "Missing parameter(s).",
     });
+};
+
+const getAllOrder = async (req, res) => {
+    // const authorizationHeader = req.headers["authorization"];
+    // const token = authorizationHeader.split(" ")[1]; // 'Beaer <Token>'
+
+    // jwt.verify(token, process.env.NODE_ACCESS_TOKEN_SECRET_KEY, (err, data) => {
+    //     if (err || data.role_id >= 3) {
+    //         return res.status(401).json({
+    //             code: ResponseCode.AUTHORIZATION_ERROR,
+    //             message: "Forbidden. Access denied.",
+    //         });
+    //     }
+    // });
+
+    // delete req.headers["authorization"];
+
+    const { status_id, page } = req.query;
+    const data = await orderService.handleGetAllOrders(status_id, page);
+    return res.status(200).json(data);
 };
 
 let createOrder = async (req, res) => {
@@ -128,6 +149,7 @@ let deleteOrder = async (req, res) => {
 
 export default {
     getPaymentMethods,
+    getAllOrder,
     getOrder,
     createOrder,
     confirmOrder,

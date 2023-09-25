@@ -6,20 +6,21 @@ var _constant = require("../constant");
 var _database = _interopRequireDefault(require("../config/database"));
 var _lodash = _interopRequireDefault(require("lodash"));
 var _excluded = ["id", "shipping_address_id", "payment_method_id", "status_id"],
-  _excluded2 = ["id", "order_uuid", "shipping_address_id", "payment_method_id", "status_id"],
-  _excluded3 = ["id", "shipping_address_id", "payment_method_id", "status_id"];
+  _excluded2 = ["id", "shipping_address_id", "payment_method_id", "status_id"],
+  _excluded3 = ["id", "shipping_address_id", "payment_method_id", "status_id"],
+  _excluded4 = ["id", "shipping_address_id", "payment_method_id", "status_id"];
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
 function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
-function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
-function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
 function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
 function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
 function _defineProperty(obj, key, value) { key = _toPropertyKey(key); if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 function _toPropertyKey(arg) { var key = _toPrimitive(arg, "string"); return _typeof(key) === "symbol" ? key : String(key); }
 function _toPrimitive(input, hint) { if (_typeof(input) !== "object" || input === null) return input; var prim = input[Symbol.toPrimitive]; if (prim !== undefined) { var res = prim.call(input, hint || "default"); if (_typeof(res) !== "object") return res; throw new TypeError("@@toPrimitive must return a primitive value."); } return (hint === "string" ? String : Number)(input); }
+function _objectWithoutProperties(source, excluded) { if (source == null) return {}; var target = _objectWithoutPropertiesLoose(source, excluded); var key, i; if (Object.getOwnPropertySymbols) { var sourceSymbolKeys = Object.getOwnPropertySymbols(source); for (i = 0; i < sourceSymbolKeys.length; i++) { key = sourceSymbolKeys[i]; if (excluded.indexOf(key) >= 0) continue; if (!Object.prototype.propertyIsEnumerable.call(source, key)) continue; target[key] = source[key]; } } return target; }
+function _objectWithoutPropertiesLoose(source, excluded) { if (source == null) return {}; var target = {}; var sourceKeys = Object.keys(source); var key, i; for (i = 0; i < sourceKeys.length; i++) { key = sourceKeys[i]; if (excluded.indexOf(key) >= 0) continue; target[key] = source[key]; } return target; }
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
@@ -74,164 +75,111 @@ var handleGetPaymentMethods = /*#__PURE__*/function () {
     return _ref.apply(this, arguments);
   };
 }();
-var handleGetOrders = /*#__PURE__*/function () {
-  var _ref2 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee2(customerId) {
-    var orderFilter, orders, orderUuids, orderAddressIds, _yield$Promise$all, _yield$Promise$all2, orderStates, orderDetails, orderDeliveryAddresses, result;
+var handleGetAllOrders = /*#__PURE__*/function () {
+  var _ref2 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee2(status_id, page) {
+    var t, currentPage, _yield$db$Order$findA, count, orders, _yield$Promise$all, _yield$Promise$all2, orderDetails, shippingAddresses, paymentMethods, orderStatuses, result;
     return _regeneratorRuntime().wrap(function _callee2$(_context2) {
       while (1) {
         switch (_context2.prev = _context2.next) {
           case 0:
-            _context2.prev = 0;
-            if (customerId) {
-              _context2.next = 3;
+            t = _database["default"].transaction();
+            currentPage = page && !_lodash["default"].isNaN(page) ? page : 1;
+            _context2.prev = 2;
+            _context2.next = 5;
+            return _models["default"].Order.findAndCountAll({
+              order: [["id", "DESC"]],
+              limit: 12,
+              offset: (currentPage - 1) * 12
+            });
+          case 5:
+            _yield$db$Order$findA = _context2.sent;
+            count = _yield$db$Order$findA.count;
+            orders = _yield$db$Order$findA.rows;
+            if (!(count > 0)) {
+              _context2.next = 19;
               break;
             }
-            return _context2.abrupt("return", {
-              code: _constant.ResponseCode.MISSING_PARAMETER,
-              message: "Missing parameter(s)."
-            });
-          case 3:
-            orderFilter = {};
-            if (customerId !== "all") {
-              orderFilter = {
-                customerId: customerId
-              };
-            }
-            _context2.next = 7;
-            return _models["default"].Order.findAll({
-              where: orderFilter,
-              order: [["id", "DESC"]]
-            });
-          case 7:
-            orders = _context2.sent;
-            orderUuids = orders.map(function (order) {
-              return order.orderUuid;
-            });
-            orderAddressIds = orders.map(function (order) {
-              return order.deliveryAddressId;
-            });
-            _context2.next = 12;
-            return Promise.all([_models["default"].OrderState.findAll({
+            _context2.next = 11;
+            return Promise.all([_models["default"].OrderDetail.findAll({
               where: {
-                orderUuid: orderUuids
+                order_uuid: orders.map(function (order) {
+                  return order.order_uuid;
+                })
               }
-            }), _models["default"].ViewOrderDetails.findAll({
+            }), _models["default"].ShippingAddress.findAll({
               where: {
-                orderUuid: orderUuids
+                id: orders.map(function (order) {
+                  return order.shipping_address_id;
+                })
               }
-            }), _models["default"].DeliveryAddress.findAll({
-              where: {
-                id: orderAddressIds
-              }
-            })]);
-          case 12:
+            }), _models["default"].PaymentMethod.findAll(), _models["default"].Status.findAll()]);
+          case 11:
             _yield$Promise$all = _context2.sent;
-            _yield$Promise$all2 = _slicedToArray(_yield$Promise$all, 3);
-            orderStates = _yield$Promise$all2[0];
-            orderDetails = _yield$Promise$all2[1];
-            orderDeliveryAddresses = _yield$Promise$all2[2];
-            result = orders.map(function (item) {
-              var items = orderDetails.filter(function (details) {
-                return details.orderUuid === item.orderUuid;
+            _yield$Promise$all2 = _slicedToArray(_yield$Promise$all, 4);
+            orderDetails = _yield$Promise$all2[0];
+            shippingAddresses = _yield$Promise$all2[1];
+            paymentMethods = _yield$Promise$all2[2];
+            orderStatuses = _yield$Promise$all2[3];
+            result = orders.map(function (order) {
+              var id = order.id,
+                shipping_address_id = order.shipping_address_id,
+                payment_method_id = order.payment_method_id,
+                status_id = order.status_id,
+                rest = _objectWithoutProperties(order, _excluded);
+              var orderStatus = orderStatuses.find(function (status) {
+                return status.id === status_id;
               });
-              var states = orderStates.filter(function (states) {
-                return states.orderUuid === item.orderUuid;
+              var orderDetail = orderDetails.filter(function (detail) {
+                return detail.order_uuid === order.order_uuid;
               });
-              var deliveryAddress = orderDeliveryAddresses.find(function (address) {
-                return address.id === item.deliveryAddressId;
+              var shippingAddress = shippingAddresses.find(function (address) {
+                return address.id === shipping_address_id;
               });
-              return _objectSpread(_objectSpread({}, item), {}, {
-                items: items,
-                states: states,
-                deliveryAddress: deliveryAddress
+              var paymentMethod = paymentMethods.find(function (method) {
+                return method.id === payment_method_id;
+              });
+              return _objectSpread(_objectSpread({}, rest), {}, {
+                status: orderStatus,
+                items: orderDetail,
+                shipping_address: shippingAddress,
+                payment_method: paymentMethod
               });
             });
             return _context2.abrupt("return", {
               code: _constant.ResponseCode.SUCCESS,
               message: "Retrieved orders successfully",
+              page: currentPage,
+              total_pages: Math.ceil(count / 12),
+              total_results: count,
               result: result
             });
-          case 21:
-            _context2.prev = 21;
-            _context2.t0 = _context2["catch"](0);
+          case 19:
+            return _context2.abrupt("return", {
+              code: _constant.ResponseCode.FILE_NOT_FOUND,
+              message: "Orders not found."
+            });
+          case 22:
+            _context2.prev = 22;
+            _context2.t0 = _context2["catch"](2);
             console.log(_context2.t0);
             return _context2.abrupt("return", {
               code: _constant.ResponseCode.DATABASE_ERROR,
-              message: "An error occurred while retrieving the order."
+              message: "An error occurred while retrieving the orders."
             });
-          case 25:
+          case 26:
           case "end":
             return _context2.stop();
         }
       }
-    }, _callee2, null, [[0, 21]]);
+    }, _callee2, null, [[2, 22]]);
   }));
-  return function handleGetOrders(_x) {
+  return function handleGetAllOrders(_x, _x2) {
     return _ref2.apply(this, arguments);
   };
 }();
-
-// const handleGetOrders = async (customerId) => {
-//     try {
-//         if (!customerId) {
-//             return {
-//                 code: ResponseCode.MISSING_PARAMETER,
-//                 message: "Missing parameter(s).",
-//             };
-//         }
-
-//         if (customerId === "all") {
-//                         const allOrders = await db.Order.findAll({
-//                 include: [
-//                     {
-//                         model: db.OrderState,
-//                     },
-//                     {
-//                         model: db.OrderDetails,
-//                     },
-//                 ],
-//             });
-
-//             return {
-//                 code: ResponseCode.SUCCESS,
-//                 message: "Retrieved orders successfully",
-//                 result: allOrders,
-//             };
-//         }
-
-//         const orders = await db.Order.findAll({
-//             where: { customerId: Number(customerId) },
-//             attributes: ["orderUuid", "customerId", "deliveryAddressId", "subtotal", "note"],
-//             include: [
-//                 {
-//                     model: db.OrderState,
-//                     attributes: ["stateCode", "stateDesc"],
-//                 },
-//                 {
-//                     model: db.OrderDetails,
-//                     attributes: ["productId", "quantity", "price"],
-//                 },
-//             ],
-//         });
-
-//         return {
-//             code: ResponseCode.SUCCESS,
-//             message: "Retrieved orders successfully",
-//             result: orders,
-//         };
-//     } catch (error) {
-//         console.log(error);
-
-//         return {
-//             code: ResponseCode.DATABASE_ERROR,
-//             message: "An error occurred while retrieving the order.",
-//         };
-//     }
-// };
-
 var handleGetOneOrderByUuid = /*#__PURE__*/function () {
   var _ref3 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee3(order_uuid) {
-    var t, order, id, shipping_address_id, payment_method_id, status_id, rest, _yield$Promise$all3, _yield$Promise$all4, order_status, order_details, shipping_address, payment_method;
+    var t, order, id, shipping_address_id, payment_method_id, status_id, rest, _yield$Promise$all3, _yield$Promise$all4, order_status, order_details, shipping_address, payment_method, history;
     return _regeneratorRuntime().wrap(function _callee3$(_context3) {
       while (1) {
         switch (_context3.prev = _context3.next) {
@@ -247,10 +195,10 @@ var handleGetOneOrderByUuid = /*#__PURE__*/function () {
           case 4:
             order = _context3.sent;
             if (!order) {
-              _context3.next = 16;
+              _context3.next = 17;
               break;
             }
-            id = order.id, shipping_address_id = order.shipping_address_id, payment_method_id = order.payment_method_id, status_id = order.status_id, rest = _objectWithoutProperties(order, _excluded);
+            id = order.id, shipping_address_id = order.shipping_address_id, payment_method_id = order.payment_method_id, status_id = order.status_id, rest = _objectWithoutProperties(order, _excluded2);
             _context3.next = 9;
             return Promise.all([_models["default"].Status.findOne({
               where: {
@@ -268,45 +216,51 @@ var handleGetOneOrderByUuid = /*#__PURE__*/function () {
               where: {
                 id: payment_method_id
               }
+            }), _models["default"].HistoryOrderUpdateStatusView.findAll({
+              where: {
+                order_uuid: order_uuid
+              }
             })]);
           case 9:
             _yield$Promise$all3 = _context3.sent;
-            _yield$Promise$all4 = _slicedToArray(_yield$Promise$all3, 4);
+            _yield$Promise$all4 = _slicedToArray(_yield$Promise$all3, 5);
             order_status = _yield$Promise$all4[0];
             order_details = _yield$Promise$all4[1];
             shipping_address = _yield$Promise$all4[2];
             payment_method = _yield$Promise$all4[3];
+            history = _yield$Promise$all4[4];
             return _context3.abrupt("return", {
               code: _constant.ResponseCode.SUCCESS,
               message: "Retrieved order ".concat(order_uuid, " successfully"),
               result: _objectSpread(_objectSpread({}, rest), {}, {
                 status: order_status,
-                item: order_details,
+                items: order_details,
                 shipping_address: shipping_address,
-                payment_method: payment_method
+                payment_method: payment_method,
+                history: history
               })
             });
-          case 16:
+          case 17:
             return _context3.abrupt("return", {
               code: _constant.ResponseCode.FILE_NOT_FOUND,
               message: "Order ".concat(order_uuid, " not found.")
             });
-          case 19:
-            _context3.prev = 19;
+          case 20:
+            _context3.prev = 20;
             _context3.t0 = _context3["catch"](1);
             console.log(_context3.t0);
             return _context3.abrupt("return", {
               code: _constant.ResponseCode.DATABASE_ERROR,
               message: "An error occurred while retrieving the order."
             });
-          case 23:
+          case 24:
           case "end":
             return _context3.stop();
         }
       }
-    }, _callee3, null, [[1, 19]]);
+    }, _callee3, null, [[1, 20]]);
   }));
-  return function handleGetOneOrderByUuid(_x2) {
+  return function handleGetOneOrderByUuid(_x3) {
     return _ref3.apply(this, arguments);
   };
 }();
@@ -375,16 +329,15 @@ var handleGetOrdersByUuids = /*#__PURE__*/function () {
             paymentMethods = _yield$Promise$all6[3];
             result = orders.map(function (order) {
               var id = order.id,
-                order_uuid = order.order_uuid,
                 shipping_address_id = order.shipping_address_id,
                 payment_method_id = order.payment_method_id,
                 status_id = order.status_id,
-                rest = _objectWithoutProperties(order, _excluded2);
+                rest = _objectWithoutProperties(order, _excluded3);
               var orderStatus = orderStatuses.find(function (status) {
                 return status.id === status_id;
               });
               var orderDetail = orderDetails.filter(function (detail) {
-                return detail.order_uuid === order_uuid;
+                return detail.order_uuid === order.order_uuid;
               });
               var shippingAddress = shippingAddresses.find(function (address) {
                 return address.id === shipping_address_id;
@@ -393,7 +346,6 @@ var handleGetOrdersByUuids = /*#__PURE__*/function () {
                 return method.id === payment_method_id;
               });
               return _objectSpread(_objectSpread({}, rest), {}, {
-                order_uuid: order_uuid,
                 status: orderStatus,
                 items: orderDetail,
                 shipping_address: shippingAddress,
@@ -425,7 +377,7 @@ var handleGetOrdersByUuids = /*#__PURE__*/function () {
       }
     }, _callee4, null, [[1, 23]]);
   }));
-  return function handleGetOrdersByUuids(_x3) {
+  return function handleGetOrdersByUuids(_x4) {
     return _ref4.apply(this, arguments);
   };
 }();
@@ -500,7 +452,7 @@ var handleGetOrdersByUserPhoneNumber = /*#__PURE__*/function () {
                 shipping_address_id = order.shipping_address_id,
                 payment_method_id = order.payment_method_id,
                 status_id = order.status_id,
-                rest = _objectWithoutProperties(order, _excluded3);
+                rest = _objectWithoutProperties(order, _excluded4);
               var orderDetail = orderDetails.filter(function (detail) {
                 return detail.order_uuid === order.order_uuid;
               });
@@ -545,7 +497,7 @@ var handleGetOrdersByUserPhoneNumber = /*#__PURE__*/function () {
       }
     }, _callee5, null, [[1, 23]]);
   }));
-  return function handleGetOrdersByUserPhoneNumber(_x4) {
+  return function handleGetOrdersByUserPhoneNumber(_x5) {
     return _ref5.apply(this, arguments);
   };
 }();
@@ -642,7 +594,7 @@ var handleCreateOrder = /*#__PURE__*/function () {
       }
     }, _callee6, null, [[3, 23]]);
   }));
-  return function handleCreateOrder(_x5) {
+  return function handleCreateOrder(_x6) {
     return _ref6.apply(this, arguments);
   };
 }();
@@ -711,7 +663,7 @@ var handleConfirmOrder = function handleConfirmOrder(uuid) {
         }
       }, _callee7, null, [[1, 21]]);
     }));
-    return function (_x6, _x7) {
+    return function (_x7, _x8) {
       return _ref8.apply(this, arguments);
     };
   }());
@@ -781,7 +733,7 @@ var handleDeliveryOrder = function handleDeliveryOrder(uuid) {
         }
       }, _callee8, null, [[1, 21]]);
     }));
-    return function (_x8, _x9) {
+    return function (_x9, _x10) {
       return _ref9.apply(this, arguments);
     };
   }());
@@ -851,7 +803,7 @@ var handleFinishedOrder = function handleFinishedOrder(uuid) {
         }
       }, _callee9, null, [[1, 21]]);
     }));
-    return function (_x10, _x11) {
+    return function (_x11, _x12) {
       return _ref10.apply(this, arguments);
     };
   }());
@@ -921,7 +873,7 @@ var handleCancelOrder = function handleCancelOrder(uuid) {
         }
       }, _callee10, null, [[1, 21]]);
     }));
-    return function (_x12, _x13) {
+    return function (_x13, _x14) {
       return _ref11.apply(this, arguments);
     };
   }());
@@ -977,14 +929,14 @@ var handleDeleteOrder = function handleDeleteOrder(orderId) {
         }
       }, _callee11, null, [[1, 17]]);
     }));
-    return function (_x14, _x15) {
+    return function (_x15, _x16) {
       return _ref12.apply(this, arguments);
     };
   }());
 };
 module.exports = {
   handleGetPaymentMethods: handleGetPaymentMethods,
-  handleGetOrders: handleGetOrders,
+  handleGetAllOrders: handleGetAllOrders,
   handleGetOneOrderByUuid: handleGetOneOrderByUuid,
   handleGetOrdersByUuids: handleGetOrdersByUuids,
   handleGetOrdersByUserPhoneNumber: handleGetOrdersByUserPhoneNumber,

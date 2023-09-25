@@ -58,6 +58,7 @@ var initRoutes = function initRoutes(app) {
   router.get("/api/payment-method/get", _orderController["default"].getPaymentMethods);
   router.get("/api/order/get", _orderController["default"].getOrder);
   router.post("/api/order/checkout", _orderController["default"].createOrder);
+  router.get("/api/auth/order/get", _orderController["default"].getAllOrder);
   router.post("/api/order/create", _verifyAccessToken["default"], _orderController["default"].createOrder);
   router.post("/api/order/confirm", _verifyAccessToken["default"], _orderController["default"].confirmOrder);
   router.post("/api/order/delivery", _verifyAccessToken["default"], _orderController["default"].deliveryOrder);
