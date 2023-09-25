@@ -49,6 +49,7 @@ let initRoutes = (app) => {
     router.get("/api/material/get", productController.getMaterials);
     router.get("/api/product/count", productController.countProducts);
     router.get("/api/product/get", productController.getProduct);
+    router.get("/api/product/search", productController.searchProduct);
     router.post("/api/product/create", verifyAccessToken, productController.createProduct);
     router.put("/api/product/update", verifyAccessToken, productController.updateProduct);
     router.delete("/api/product/delete", verifyAccessToken, productController.deleteProduct);

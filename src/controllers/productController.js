@@ -17,7 +17,6 @@ const countProducts = async (req, res) => {
     return res.status(200).json(data);
 };
 // PRODUCT
-
 const getProduct = async (req, res) => {
     const { slug, categories, page } = req.query;
 
@@ -27,6 +26,19 @@ const getProduct = async (req, res) => {
     }
     const data = await productService.handleGetProducts(categories, page);
     return res.status(200).json(data);
+};
+
+const searchProduct = async (req, res) => {
+    const { keyword, page } = req.query;
+
+    if (keyword) {
+        const data = await productService.handleSearchProducts(keyword, page);
+        return res.status(200).json(data);
+    }
+    return res.status(400).json({
+        code: ResponseCode.MISSING_PARAMETER,
+        message: "Missing parameter(s). Check again.",
+    });
 };
 
 const createProduct = async (req, res) => {
@@ -168,6 +180,7 @@ export default {
     getMaterials,
     countProducts,
     getProduct,
+    searchProduct,
     createProduct,
     updateProduct,
     deleteProduct,

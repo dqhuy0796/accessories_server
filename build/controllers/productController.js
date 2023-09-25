@@ -83,7 +83,6 @@ var countProducts = /*#__PURE__*/function () {
   };
 }();
 // PRODUCT
-
 var getProduct = /*#__PURE__*/function () {
   var _ref4 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee4(req, res) {
     var _req$query, slug, categories, page, _data, data;
@@ -118,32 +117,20 @@ var getProduct = /*#__PURE__*/function () {
     return _ref4.apply(this, arguments);
   };
 }();
-var createProduct = /*#__PURE__*/function () {
+var searchProduct = /*#__PURE__*/function () {
   var _ref5 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee5(req, res) {
-    var _req$body, name, slug, price, brand, category, material, color, quantity, feature_image_url, description, images, data;
+    var _req$query2, keyword, page, data;
     return _regeneratorRuntime().wrap(function _callee5$(_context5) {
       while (1) {
         switch (_context5.prev = _context5.next) {
           case 0:
-            _req$body = req.body, name = _req$body.name, slug = _req$body.slug, price = _req$body.price, brand = _req$body.brand, category = _req$body.category, material = _req$body.material, color = _req$body.color, quantity = _req$body.quantity, feature_image_url = _req$body.feature_image_url, description = _req$body.description, images = _req$body.images;
-            if (!(name && slug && price && brand && category && material && color && quantity && feature_image_url && description && images)) {
+            _req$query2 = req.query, keyword = _req$query2.keyword, page = _req$query2.page;
+            if (!keyword) {
               _context5.next = 6;
               break;
             }
             _context5.next = 4;
-            return _productService["default"].handleCreateProduct({
-              name: name,
-              slug: slug,
-              price: price,
-              brand: brand,
-              category: category,
-              material: material,
-              color: color,
-              quantity: quantity,
-              feature_image_url: feature_image_url,
-              description: description,
-              images: images
-            });
+            return _productService["default"].handleSearchProducts(keyword, page);
           case 4:
             data = _context5.sent;
             return _context5.abrupt("return", res.status(200).json(data));
@@ -159,25 +146,24 @@ var createProduct = /*#__PURE__*/function () {
       }
     }, _callee5);
   }));
-  return function createProduct(_x9, _x10) {
+  return function searchProduct(_x9, _x10) {
     return _ref5.apply(this, arguments);
   };
 }();
-var updateProduct = /*#__PURE__*/function () {
+var createProduct = /*#__PURE__*/function () {
   var _ref6 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee6(req, res) {
-    var _req$body2, id, name, slug, price, brand, category, material, color, quantity, description, feature_image_url, images, data;
+    var _req$body, name, slug, price, brand, category, material, color, quantity, feature_image_url, description, images, data;
     return _regeneratorRuntime().wrap(function _callee6$(_context6) {
       while (1) {
         switch (_context6.prev = _context6.next) {
           case 0:
-            _req$body2 = req.body, id = _req$body2.id, name = _req$body2.name, slug = _req$body2.slug, price = _req$body2.price, brand = _req$body2.brand, category = _req$body2.category, material = _req$body2.material, color = _req$body2.color, quantity = _req$body2.quantity, description = _req$body2.description, feature_image_url = _req$body2.feature_image_url, images = _req$body2.images;
-            if (!(id && name && slug && price && brand && category && material && color && quantity && feature_image_url && description && images)) {
+            _req$body = req.body, name = _req$body.name, slug = _req$body.slug, price = _req$body.price, brand = _req$body.brand, category = _req$body.category, material = _req$body.material, color = _req$body.color, quantity = _req$body.quantity, feature_image_url = _req$body.feature_image_url, description = _req$body.description, images = _req$body.images;
+            if (!(name && slug && price && brand && category && material && color && quantity && feature_image_url && description && images)) {
               _context6.next = 6;
               break;
             }
             _context6.next = 4;
-            return _productService["default"].handleUpdateProduct({
-              id: id,
+            return _productService["default"].handleCreateProduct({
               name: name,
               slug: slug,
               price: price,
@@ -205,27 +191,36 @@ var updateProduct = /*#__PURE__*/function () {
       }
     }, _callee6);
   }));
-  return function updateProduct(_x11, _x12) {
+  return function createProduct(_x11, _x12) {
     return _ref6.apply(this, arguments);
   };
 }();
-var deleteProduct = /*#__PURE__*/function () {
+var updateProduct = /*#__PURE__*/function () {
   var _ref7 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee7(req, res) {
-    var _req$body3, id, name, price, data;
+    var _req$body2, id, name, slug, price, brand, category, material, color, quantity, description, feature_image_url, images, data;
     return _regeneratorRuntime().wrap(function _callee7$(_context7) {
       while (1) {
         switch (_context7.prev = _context7.next) {
           case 0:
-            _req$body3 = req.body, id = _req$body3.id, name = _req$body3.name, price = _req$body3.price;
-            if (!(id && name && price)) {
+            _req$body2 = req.body, id = _req$body2.id, name = _req$body2.name, slug = _req$body2.slug, price = _req$body2.price, brand = _req$body2.brand, category = _req$body2.category, material = _req$body2.material, color = _req$body2.color, quantity = _req$body2.quantity, description = _req$body2.description, feature_image_url = _req$body2.feature_image_url, images = _req$body2.images;
+            if (!(id && name && slug && price && brand && category && material && color && quantity && feature_image_url && description && images)) {
               _context7.next = 6;
               break;
             }
             _context7.next = 4;
-            return _productService["default"].handleDeleteProduct({
+            return _productService["default"].handleUpdateProduct({
               id: id,
               name: name,
-              price: price
+              slug: slug,
+              price: price,
+              brand: brand,
+              category: category,
+              material: material,
+              color: color,
+              quantity: quantity,
+              feature_image_url: feature_image_url,
+              description: description,
+              images: images
             });
           case 4:
             data = _context7.sent;
@@ -242,53 +237,90 @@ var deleteProduct = /*#__PURE__*/function () {
       }
     }, _callee7);
   }));
-  return function deleteProduct(_x13, _x14) {
+  return function updateProduct(_x13, _x14) {
     return _ref7.apply(this, arguments);
   };
 }();
-var rollbackImages = /*#__PURE__*/function () {
+var deleteProduct = /*#__PURE__*/function () {
   var _ref8 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee8(req, res) {
-    var images, result;
+    var _req$body3, id, name, price, data;
     return _regeneratorRuntime().wrap(function _callee8$(_context8) {
       while (1) {
         switch (_context8.prev = _context8.next) {
           case 0:
-            images = req.body.images;
-            if (!(images && !_lodash["default"].isEmpty(images))) {
-              _context8.next = 8;
+            _req$body3 = req.body, id = _req$body3.id, name = _req$body3.name, price = _req$body3.price;
+            if (!(id && name && price)) {
+              _context8.next = 6;
               break;
             }
             _context8.next = 4;
-            return _imageService["default"].handleRemoveImagesFromCloud(images);
+            return _productService["default"].handleDeleteProduct({
+              id: id,
+              name: name,
+              price: price
+            });
           case 4:
-            result = _context8.sent;
-            if (!result) {
-              _context8.next = 7;
-              break;
-            }
-            return _context8.abrupt("return", res.status(200).json({
-              code: _constant.ResponseCode.SUCCESS,
-              message: "Delete images successfully."
-            }));
-          case 7:
-            return _context8.abrupt("return", res.status(200).json({
-              code: _constant.ResponseCode.DATABASE_ERROR,
-              message: "Delete images failure."
-            }));
-          case 8:
+            data = _context8.sent;
+            return _context8.abrupt("return", res.status(200).json(data));
+          case 6:
             return _context8.abrupt("return", res.status(400).json({
               code: _constant.ResponseCode.MISSING_PARAMETER,
               message: "Missing parameter(s). Check again."
             }));
-          case 9:
+          case 7:
           case "end":
             return _context8.stop();
         }
       }
     }, _callee8);
   }));
-  return function rollbackImages(_x15, _x16) {
+  return function deleteProduct(_x15, _x16) {
     return _ref8.apply(this, arguments);
+  };
+}();
+var rollbackImages = /*#__PURE__*/function () {
+  var _ref9 = _asyncToGenerator( /*#__PURE__*/_regeneratorRuntime().mark(function _callee9(req, res) {
+    var images, result;
+    return _regeneratorRuntime().wrap(function _callee9$(_context9) {
+      while (1) {
+        switch (_context9.prev = _context9.next) {
+          case 0:
+            images = req.body.images;
+            if (!(images && !_lodash["default"].isEmpty(images))) {
+              _context9.next = 8;
+              break;
+            }
+            _context9.next = 4;
+            return _imageService["default"].handleRemoveImagesFromCloud(images);
+          case 4:
+            result = _context9.sent;
+            if (!result) {
+              _context9.next = 7;
+              break;
+            }
+            return _context9.abrupt("return", res.status(200).json({
+              code: _constant.ResponseCode.SUCCESS,
+              message: "Delete images successfully."
+            }));
+          case 7:
+            return _context9.abrupt("return", res.status(200).json({
+              code: _constant.ResponseCode.DATABASE_ERROR,
+              message: "Delete images failure."
+            }));
+          case 8:
+            return _context9.abrupt("return", res.status(400).json({
+              code: _constant.ResponseCode.MISSING_PARAMETER,
+              message: "Missing parameter(s). Check again."
+            }));
+          case 9:
+          case "end":
+            return _context9.stop();
+        }
+      }
+    }, _callee9);
+  }));
+  return function rollbackImages(_x17, _x18) {
+    return _ref9.apply(this, arguments);
   };
 }();
 var _default = {
@@ -296,6 +328,7 @@ var _default = {
   getMaterials: getMaterials,
   countProducts: countProducts,
   getProduct: getProduct,
+  searchProduct: searchProduct,
   createProduct: createProduct,
   updateProduct: updateProduct,
   deleteProduct: deleteProduct,

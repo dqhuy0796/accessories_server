@@ -1,8 +1,9 @@
 import _ from "lodash";
+import sequelize from "../config/database";
 import { ResponseCode } from "../constant";
 import db from "../models";
-import sequelize from "../config/database";
 import imageService from "./imageService";
+const { Op } = require("sequelize");
 
 const handleGetCategories = async () => {
     try {
@@ -195,6 +196,66 @@ const handleGetProductBy = async (slug) => {
         return {
             code: ResponseCode.FILE_NOT_FOUND,
             message: "get product failure",
+        };
+    } catch (error) {
+        console.log(error);
+
+        return {
+            code: ResponseCode.INTERNAL_SERVER_ERROR,
+            message: "Error occurs, check again!",
+        };
+    }
+};
+
+const handleSearchProducts = async (keyword, page) => {
+    try {
+        const currentPage = page && !_.isNaN(page) ? page : 1;
+
+        if (keyword) {
+            const { count, rows } = await db.Product.findAndCountAll({
+                where: {
+                    [Op.or]: [
+                        {
+                            name: {
+                                [Op.like]: `%${keyword}%`,
+                            },
+                        },
+                        {
+                            slug: {
+                                [Op.like]: `%${keyword}%`,
+                            },
+                        },
+                        {
+                            description: {
+                                [Op.like]: `%${keyword}%`,
+                            },
+                        },
+                    ],
+                },
+                order: [["id", "DESC"]],
+                limit: 12,
+                offset: (currentPage - 1) * 12,
+            });
+
+            if (rows) {
+                return {
+                    code: ResponseCode.SUCCESS,
+                    message: "Retrieved search products successfully",
+                    page: currentPage,
+                    total_pages: Math.ceil(count / 12),
+                    total_results: count,
+                    result: rows,
+                };
+            }
+            return {
+                code: ResponseCode.FILE_NOT_FOUND,
+                message: "No product match, check again.",
+            };
+        }
+
+        return {
+            code: ResponseCode.FILE_NOT_FOUND,
+            message: "Get products failure.",
         };
     } catch (error) {
         console.log(error);
@@ -400,6 +461,7 @@ module.exports = {
     handleGetMaterials,
     handleCountProducts,
     handleGetProducts,
+    handleSearchProducts,
     handleGetProductBy,
     handleCreateProduct,
     handleUpdateProduct,

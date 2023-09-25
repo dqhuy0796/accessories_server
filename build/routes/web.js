@@ -49,6 +49,7 @@ var initRoutes = function initRoutes(app) {
   router.get("/api/material/get", _productController["default"].getMaterials);
   router.get("/api/product/count", _productController["default"].countProducts);
   router.get("/api/product/get", _productController["default"].getProduct);
+  router.get("/api/product/search", _productController["default"].searchProduct);
   router.post("/api/product/create", _verifyAccessToken["default"], _productController["default"].createProduct);
   router.put("/api/product/update", _verifyAccessToken["default"], _productController["default"].updateProduct);
   router["delete"]("/api/product/delete", _verifyAccessToken["default"], _productController["default"].deleteProduct);
